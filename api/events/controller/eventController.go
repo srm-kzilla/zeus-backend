@@ -8,9 +8,11 @@ import (
 	"github.com/gofiber/fiber/v2"
 	model "github.com/srm-kzilla/events/api/events/model"
 	"github.com/srm-kzilla/events/database"
+	"github.com/srm-kzilla/events/validators"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
+// Get all Events Route
 func GetAllEvents(c *fiber.Ctx) error {
 	var events []model.Event
 	// var c *fiber.Ctx
@@ -37,10 +39,17 @@ func GetAllEvents(c *fiber.Ctx) error {
 	return nil
 }
 
+// FIXME: Some of the data is not passsing in the database
 func CreateEvent(c *fiber.Ctx) error {
 	var event model.Event
 
 	c.BodyParser(&event)
+
+	errors := validators.ValidateEvents(event)
+	if errors != nil {
+		c.Status(fiber.StatusBadGateway).JSON(errors)
+		return nil
+	}
 
 	eventsCollection, e := database.GetCollection("zeus_Events", "Events")
 	if e != nil {
@@ -52,15 +61,50 @@ func CreateEvent(c *fiber.Ctx) error {
 
 	res, err := eventsCollection.InsertOne(context.Background(), event)
 	if err != nil {
-		log.Fatal("Error", err)
+		log.Println("Error", err)
 		c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"Success":     true,
+			"Success":     false,
 			"Inserted ID": res.InsertedID,
 		})
-
+		return err
 	}
 
 	c.Status(fiber.StatusCreated).JSON(event)
+
+	return nil
+}
+
+// TODO: Event Regsitration Route handler
+func RegisterForEvent(c *fiber.Ctx) error {
+	var user model.User
+	c.BodyParser(&user)
+
+	errors := validators.ValidateUser(user)
+	if errors != nil {
+		c.Status(fiber.StatusBadGateway).JSON(errors)
+		return nil
+	}
+
+	usersCollection, e := database.GetCollection("zeus_Events", "Users")
+	if e != nil {
+		fmt.Println("Error: ", e)
+		c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error":   e.Error(),
+			"message": "Collection Not found ⚠️",
+		})
+	}
+
+	res, err := usersCollection.InsertOne(context.Background(), user)
+	if err != nil {
+		log.Println("Error", err)
+		c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"Success":     false,
+			"Inserted ID": res.InsertedID,
+		})
+		return err
+	}
+	log.Println(user)
+	c.Status(fiber.StatusCreated).JSON(user)
 
 	return nil
 }
