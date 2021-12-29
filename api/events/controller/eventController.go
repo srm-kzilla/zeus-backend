@@ -10,6 +10,7 @@ import (
 	"github.com/srm-kzilla/events/database"
 	"github.com/srm-kzilla/events/validators"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 // Get all Events Route
@@ -107,4 +108,29 @@ func RegisterForEvent(c *fiber.Ctx) error {
 	c.Status(fiber.StatusCreated).JSON(user)
 
 	return nil
+}
+
+func GetEventById(c *fiber.Ctx) error {
+	var event model.Event
+	var id = c.Query("id")
+	objId, _ := primitive.ObjectIDFromHex(id)
+
+	eventsCollection, e := database.GetCollection("zeus_Events", "Events")
+	if e != nil {
+		fmt.Println("Error: ", e)
+		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
+			"error": e.Error(),
+		})
+	}
+	err := eventsCollection.FindOne(context.Background(), bson.M{"_id":objId}).Decode(&event)
+	if err != nil {
+		log.Fatal("Error ", err)
+		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
+			"error": err.Error(),
+			"event": event,
+		})
+	}
+	c.Status(fiber.StatusOK).JSON(event)
+	return nil
+
 }
