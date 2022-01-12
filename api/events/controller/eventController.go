@@ -108,3 +108,28 @@ func RegisterForEvent(c *fiber.Ctx) error {
 
 	return nil
 }
+
+func GetEventUsers(c *fiber.Ctx) error {
+	var users []model.User
+	var slug = c.Query("slug")
+
+	usersCollection, e := database.GetCollection("zeus_Events", "Users")
+	if e != nil {
+		fmt.Println("Error: ", e)
+		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
+			"error": e.Error(),
+		})
+	}
+
+	cursor, err := usersCollection.Find(context.Background(), bson.M{"slug": slug})
+	if err = cursor.All(context.Background(), &users); err != nil {
+		log.Fatal("Error ", err)
+		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
+			"error": err.Error(),
+			"users": users,
+		})
+	}
+	c.Status((fiber.StatusOK)).JSON(users)
+
+	return nil
+}

@@ -13,6 +13,7 @@ func SetupApp(app *fiber.App) {
 	api := app.Group("/api")
 	api.Get("/", handleRoot)
 	api.Get("/events", controller.GetAllEvents)
+	api.Get("/users", controller.GetEventUsers)
 	api.Post("/event", controller.CreateEvent)
 	api.Post("/register", controller.RegisterForEvent)
 }
