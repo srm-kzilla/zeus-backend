@@ -2,6 +2,8 @@ package model
 
 import (
 	"time"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type Speaker struct {
@@ -21,6 +23,7 @@ type User struct {
 }
 
 type Event struct {
+	ID			primitive.ObjectID `json:"_id" bson:"_id"`
 	Title       string    `validate:"required" json:"title" bson:"title"`
 	Slug        string    `validate:"required" json:"slug" bson:"slug"`
 	Description string    `validate:"required" json:"description" bson:"description"`

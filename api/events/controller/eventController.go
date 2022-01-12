@@ -10,6 +10,7 @@ import (
 	"github.com/srm-kzilla/events/database"
 	"github.com/srm-kzilla/events/validators"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 // Get all Events Route
@@ -58,7 +59,7 @@ func CreateEvent(c *fiber.Ctx) error {
 			"error": e.Error(),
 		})
 	}
-
+	event.ID = primitive.NewObjectID();
 	res, err := eventsCollection.InsertOne(context.Background(), event)
 	if err != nil {
 		log.Println("Error", err)
