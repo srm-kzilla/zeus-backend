@@ -110,6 +110,31 @@ func RegisterForEvent(c *fiber.Ctx) error {
 	return nil
 }
 
+func GetEventById(c *fiber.Ctx) error {
+	var event model.Event
+	var id = c.Query("id")
+	objId, _ := primitive.ObjectIDFromHex(id)
+
+	eventsCollection, e := database.GetCollection("zeus_Events", "Events")
+	if e != nil {
+		fmt.Println("Error: ", e)
+		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
+			"error": e.Error(),
+		})
+	}
+	err := eventsCollection.FindOne(context.Background(), bson.M{"_id":objId}).Decode(&event)
+	if err != nil {
+		log.Fatal("Error ", err)
+		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
+			"error": err.Error(),
+			"event": event,
+		})
+	}
+	c.Status(fiber.StatusOK).JSON(event)
+	return nil
+
+}
+
 func GetEventUsers(c *fiber.Ctx) error {
 	var users []model.User
 	var slug = c.Query("slug")
