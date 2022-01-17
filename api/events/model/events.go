@@ -5,6 +5,7 @@ import (
 )
 
 type Speaker struct {
+	ID 		   primitive.ObjectID `json:"_id" bson:"_id"`
 	Name       string `json:"name" bson:"name"`
 	Email      string `json:"email" bson:"email"`
 	GithubLink string `json:"githubLink" bson:"githubLink"`
