@@ -40,12 +40,6 @@ func main() {
 	// setting up api routes
 	setupRoutes(app)
 
-	//configuring godotenv package
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error Loading .env file")
-	}
-
 	//Setting up Port Value
 	port := os.Getenv("PORT")
 	if port == "" {
