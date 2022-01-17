@@ -13,6 +13,7 @@ type Speaker struct {
 }
 
 type User struct {
+	ID          primitive.ObjectID `json:"_id" bson:"_id"`
 	Name        string `validate:"required" json:"name" bson:"name"`
 	Email       string `validate:"required,email" json:"email" bson:"email"`
 	PhoneNumber int    `validate:"required,min=10" json:"phoneNumber" bson:"phoneNumber"`
