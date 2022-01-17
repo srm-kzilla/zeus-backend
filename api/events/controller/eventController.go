@@ -104,7 +104,6 @@ func RegisterForEvent(c *fiber.Ctx) error {
 		})
 		return err
 	}
-	log.Println(user)
 	c.Status(fiber.StatusCreated).JSON(user)
 
 	return nil
