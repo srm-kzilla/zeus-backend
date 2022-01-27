@@ -10,12 +10,9 @@ import (
 func getHTMLTemplate(name string, templateName string) string {
 	var templateBuffer bytes.Buffer
 
-	// can use this type to add some additional data to the email template
 	type EmailData struct {
 		Name string
 	}
-
-	// You can bind custom data here as per requirements.
 
 	data := EmailData{
 		Name: name,

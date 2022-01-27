@@ -31,7 +31,7 @@ func GenerateSESTemplate(input model.SESInput) (template *ses.SendEmailInput) {
 				Data:    aws.String(title),
 			},
 		},
-		Source: aws.String("SRMKzilla <" + input.SenderEmail + ">"),
+		Source: aws.String("SRMKZILLA <" + input.SenderEmail + ">"),
 	}
 
 	return
