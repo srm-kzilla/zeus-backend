@@ -4,9 +4,11 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/gofiber/fiber/v2"
 	model "github.com/srm-kzilla/events/api/events/model"
+	"github.com/srm-kzilla/events/api/events/services/mailer"
 	"github.com/srm-kzilla/events/database"
 	"github.com/srm-kzilla/events/validators"
 	"go.mongodb.org/mongo-driver/bson"
@@ -59,7 +61,7 @@ func CreateEvent(c *fiber.Ctx) error {
 			"error": e.Error(),
 		})
 	}
-	event.ID = primitive.NewObjectID();
+	event.ID = primitive.NewObjectID()
 	res, err := eventsCollection.InsertOne(context.Background(), event)
 	if err != nil {
 		log.Println("Error", err)
@@ -104,6 +106,19 @@ func RegisterForEvent(c *fiber.Ctx) error {
 		})
 		return err
 	}
+
+	senderEmail := os.Getenv("SENDER_EMAIL")
+
+	sesInput := model.SESInput{
+		TemplateName:  "newUser.html",
+		Subject:       "Registration Successfull",
+		Name:          user.Name,
+		RecieverEmail: user.Email,
+		SenderEmail:   senderEmail,
+	}
+
+	mailer.SendEmail(sesInput)
+
 	c.Status(fiber.StatusCreated).JSON(user)
 
 	return nil
@@ -121,7 +136,7 @@ func GetEventById(c *fiber.Ctx) error {
 			"error": e.Error(),
 		})
 	}
-	err := eventsCollection.FindOne(context.Background(), bson.M{"_id":objId}).Decode(&event)
+	err := eventsCollection.FindOne(context.Background(), bson.M{"_id": objId}).Decode(&event)
 	if err != nil {
 		log.Fatal("Error ", err)
 		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
