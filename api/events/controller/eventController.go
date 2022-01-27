@@ -96,7 +96,7 @@ func RegisterForEvent(c *fiber.Ctx) error {
 			"message": "Collection Not found ⚠️",
 		})
 	}
-
+	user.ID = primitive.NewObjectID()
 	res, err := usersCollection.InsertOne(context.Background(), user)
 	if err != nil {
 		log.Println("Error", err)

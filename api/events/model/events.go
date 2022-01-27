@@ -1,12 +1,11 @@
 package model
 
 import (
-	"time"
-
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type Speaker struct {
+	ID 		   primitive.ObjectID `json:"_id" bson:"_id"`
 	Name       string `json:"name" bson:"name"`
 	Email      string `json:"email" bson:"email"`
 	GithubLink string `json:"githubLink" bson:"githubLink"`
@@ -15,6 +14,7 @@ type Speaker struct {
 }
 
 type User struct {
+	ID          primitive.ObjectID `json:"_id" bson:"_id"`
 	Name        string `validate:"required" json:"name" bson:"name"`
 	Email       string `validate:"required,email" json:"email" bson:"email"`
 	PhoneNumber int    `validate:"required,min=10" json:"phoneNumber" bson:"phoneNumber"`
@@ -23,13 +23,11 @@ type User struct {
 }
 
 type Event struct {
-	ID			primitive.ObjectID `json:"_id" bson:"_id"`
-	Title       string    `validate:"required" json:"title" bson:"title"`
-	Slug        string    `validate:"required" json:"slug" bson:"slug"`
-	Description string    `validate:"required" json:"description" bson:"description"`
-	StartDate   time.Time `json:"startDate" bson:"startDate"`
-	// Speakers    []Speaker `json:"speakers" bson:"speakers"`
-	// Users       []User    `json:"users" bson:"users"`
+	ID          primitive.ObjectID `json:"_id" bson:"_id"`
+	Title       string             `validate:"required" json:"title" bson:"title"`
+	Slug        string             `validate:"required" json:"slug" bson:"slug"`
+	Description string             `validate:"required" json:"description" bson:"description"`
+	StartDate   string             `json:"startDate" bson:"startDate"`
 	EventCover  string `validate:"required" json:"eventCover" bson:"eventCover"` // s3-url for event cover Image
 	IsCompleted bool   `json:"isCompleted" bson:"isCompleted"`
 }
