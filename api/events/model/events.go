@@ -28,8 +28,6 @@ type Event struct {
 	Slug        string             `validate:"required" json:"slug" bson:"slug"`
 	Description string             `validate:"required" json:"description" bson:"description"`
 	StartDate   string             `json:"startDate" bson:"startDate"`
-	// Speakers    []map[Speaker]interface{} `json:"speakers" bson:"speakers"`
-	// Users       []User    `json:"users" bson:"users"`
 	EventCover  string `validate:"required" json:"eventCover" bson:"eventCover"` // s3-url for event cover Image
 	IsCompleted bool   `json:"isCompleted" bson:"isCompleted"`
 }
