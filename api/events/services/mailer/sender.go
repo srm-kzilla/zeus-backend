@@ -27,7 +27,7 @@ func SendEmail(sesInput model.SESInput) {
 	})
 
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	service := ses.New(sess)

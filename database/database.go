@@ -16,14 +16,14 @@ func GetConnection() (*mongo.Client, error) {
 	if os.Getenv("APP_ENV") != "production" {
 		err := godotenv.Load()
 		if err != nil {
-			log.Fatal("Error Loading .env file")
+			log.Println("Error Loading .env file")
 		}
 	}
 
 	uri := os.Getenv("MONGO_URI")
 
 	if uri == "" {
-		log.Fatal("Mongo URI Required")
+		log.Println("Mongo URI Required")
 	}
 
 	db, err := mongo.Connect(context.Background(), options.Client().ApplyURI(uri))

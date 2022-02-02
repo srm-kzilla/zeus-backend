@@ -28,7 +28,7 @@ func getHTMLTemplate(name string, templateName string) string {
 	err = htmlTemplate.ExecuteTemplate(&templateBuffer, "email.html", data)
 
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 		return ""
 	}
 

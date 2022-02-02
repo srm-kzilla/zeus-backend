@@ -30,7 +30,7 @@ func GetAllEvents(c *fiber.Ctx) error {
 
 	cursor, err := eventsCollection.Find(context.Background(), bson.D{})
 	if err = cursor.All(context.Background(), &events); err != nil {
-		log.Fatal("Error ", err)
+		log.Println("Error ", err)
 		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
 			"error":  err.Error(),
 			"events": events,
@@ -128,6 +128,12 @@ func GetEventById(c *fiber.Ctx) error {
 	var event model.Event
 	var id = c.Query("id")
 	objId, _ := primitive.ObjectIDFromHex(id)
+	if id == "" {
+		c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "ID is required",
+		})
+		return nil
+	}
 
 	eventsCollection, e := database.GetCollection("zeus_Events", "Events")
 	if e != nil {
@@ -138,11 +144,11 @@ func GetEventById(c *fiber.Ctx) error {
 	}
 	err := eventsCollection.FindOne(context.Background(), bson.M{"_id": objId}).Decode(&event)
 	if err != nil {
-		log.Fatal("Error ", err)
+		log.Println("Error ", err)
 		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
 			"error": err.Error(),
-			"event": event,
 		})
+		return nil
 	}
 	c.Status(fiber.StatusOK).JSON(event)
 	return nil
@@ -163,7 +169,7 @@ func GetEventUsers(c *fiber.Ctx) error {
 
 	cursor, err := usersCollection.Find(context.Background(), bson.M{"slug": slug})
 	if err = cursor.All(context.Background(), &users); err != nil {
-		log.Fatal("Error ", err)
+		log.Println("Error ", err)
 		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
 			"error": err.Error(),
 			"users": users,

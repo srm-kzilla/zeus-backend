@@ -5,7 +5,7 @@ go 1.17
 require (
 	github.com/aws/aws-sdk-go v1.42.41
 	github.com/go-playground/validator/v10 v10.9.0
-	github.com/gofiber/fiber/v2 v2.24.0
+	github.com/gofiber/fiber/v2 v2.25.0
 	github.com/joho/godotenv v1.4.0
 	go.mongodb.org/mongo-driver v1.7.4
 )
@@ -21,7 +21,7 @@ require (
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
-	github.com/valyala/fasthttp v1.31.0 // indirect
+	github.com/valyala/fasthttp v1.32.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
 	github.com/xdg-go/scram v1.0.2 // indirect
