@@ -18,8 +18,6 @@ import (
 // Get all Events Route
 func GetAllEvents(c *fiber.Ctx) error {
 	var events []model.Event
-	// var c *fiber.Ctx
-
 	eventsCollection, e := database.GetCollection("zeus_Events", "Events")
 	if e != nil {
 		fmt.Println("Error: ", e)
@@ -143,6 +141,37 @@ func GetEventById(c *fiber.Ctx) error {
 		})
 	}
 	err := eventsCollection.FindOne(context.Background(), bson.M{"_id": objId}).Decode(&event)
+	if err != nil {
+		log.Println("Error ", err)
+		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+		return nil
+	}
+	c.Status(fiber.StatusOK).JSON(event)
+	return nil
+
+}
+
+func GetEventBySlug(c *fiber.Ctx) error {
+	var event model.Event
+	var slug = c.Params("slug")
+
+	if slug == "" {
+		c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Slug is required",
+		})
+		return nil
+	}
+
+	eventsCollection, e := database.GetCollection("zeus_Events", "Events")
+	if e != nil {
+		fmt.Println("Error: ", e)
+		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
+			"error": e.Error(),
+		})
+	}
+	err := eventsCollection.FindOne(context.Background(), bson.M{"slug": slug}).Decode(&event)
 	if err != nil {
 		log.Println("Error ", err)
 		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
