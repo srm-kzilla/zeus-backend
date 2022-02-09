@@ -27,6 +27,7 @@ type Event struct {
 	Title       string             `validate:"required" json:"title" bson:"title"`
 	Slug        string             `validate:"required" json:"slug" bson:"slug"`
 	Description string             `validate:"required" json:"description" bson:"description"`
+	Icons	    []string           `json:"icons" bson:"icons"`
 	StartDate   string             `json:"startDate" bson:"startDate"`
 	EventCover  string `validate:"required" json:"eventCover" bson:"eventCover"` // s3-url for event cover Image
 	IsCompleted bool   `json:"isCompleted" bson:"isCompleted"`
