@@ -17,7 +17,7 @@ type User struct {
 	ID          primitive.ObjectID `json:"_id" bson:"_id"`
 	Name        string `validate:"required" json:"name" bson:"name"`
 	Email       string `validate:"required,email" json:"email" bson:"email"`
-	RegNumber   string `validate:"required" json:"regNumber" bson:"regNumber"`
+	RegNumber   string `json:"regNumber" bson:"regNumber"`
 	PhoneNumber int    `validate:"required,min=10" json:"phoneNumber" bson:"phoneNumber"`
 	Feedback    string `json:"feedback" bson:"feedback"`
 	EventSlug   string `validate:"required" json:"slug" bson:"slug"`
