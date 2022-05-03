@@ -8,8 +8,8 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	model "github.com/srm-kzilla/events/api/events/model"
-	"github.com/srm-kzilla/events/api/events/services/mailer"
 	"github.com/srm-kzilla/events/database"
+	"github.com/srm-kzilla/events/utils/services/mailer"
 	"github.com/srm-kzilla/events/validators"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -107,7 +107,7 @@ func RegisterForEvent(c *fiber.Ctx) error {
 
 	senderEmail := os.Getenv("SENDER_EMAIL")
 
-	sesInput := model.SESInput{
+	sesInput := mailer.SESInput{
 		TemplateName:  "newUser.html",
 		Subject:       "Registration Successfull",
 		Name:          user.Name,

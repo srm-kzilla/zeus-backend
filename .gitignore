@@ -3,3 +3,5 @@
 # Executables
 /main
 /events
+# auto-files
+.DS_Store
