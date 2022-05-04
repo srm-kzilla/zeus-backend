@@ -13,6 +13,7 @@ type Speaker struct {
 	EventSlug  string `validate:"required" json:"slug" bson:"slug"`
 }
 
+
 type Event struct {
 	ID          primitive.ObjectID `json:"_id" bson:"_id"`
 	Title       string             `validate:"required" json:"title" bson:"title"`
