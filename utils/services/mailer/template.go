@@ -3,10 +3,9 @@ package mailer
 import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ses"
-	"github.com/srm-kzilla/events/api/events/model"
 )
 
-func GenerateSESTemplate(input model.SESInput) (template *ses.SendEmailInput) {
+func GenerateSESTemplate(input SESInput) (template *ses.SendEmailInput) {
 
 	html := getHTMLTemplate(input.Name, input.TemplateName)
 

@@ -1,4 +1,4 @@
-package model
+package eventModel
 
 import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -13,15 +13,6 @@ type Speaker struct {
 	EventSlug  string `validate:"required" json:"slug" bson:"slug"`
 }
 
-type User struct {
-	ID          primitive.ObjectID `json:"_id" bson:"_id"`
-	Name        string `validate:"required" json:"name" bson:"name"`
-	Email       string `validate:"required,email" json:"email" bson:"email"`
-	RegNumber   string `json:"regNumber" bson:"regNumber"`
-	PhoneNumber int    `validate:"required,min=10" json:"phoneNumber" bson:"phoneNumber"`
-	Feedback    string `json:"feedback" bson:"feedback"`
-	EventSlug   string `validate:"required" json:"slug" bson:"slug"`
-}
 
 type Event struct {
 	ID          primitive.ObjectID `json:"_id" bson:"_id"`
@@ -32,4 +23,5 @@ type Event struct {
 	StartDate   string             `json:"startDate" bson:"startDate"`
 	EventCover  string `validate:"required" json:"eventCover" bson:"eventCover"` // s3-url for event cover Image
 	IsCompleted bool   `json:"isCompleted" bson:"isCompleted"`
+	RSVP_Users []primitive.ObjectID `json:"rsvp_users" bson:"rsvp_users"`
 }

@@ -1,14 +1,13 @@
-package controller
+package eventController
 
 import (
 	"context"
 	"fmt"
 	"log"
-	"os"
 
 	"github.com/gofiber/fiber/v2"
-	model "github.com/srm-kzilla/events/api/events/model"
-	"github.com/srm-kzilla/events/api/events/services/mailer"
+	eventModel "github.com/srm-kzilla/events/api/events/model"
+	userModel "github.com/srm-kzilla/events/api/users/model"
 	"github.com/srm-kzilla/events/database"
 	"github.com/srm-kzilla/events/validators"
 	"go.mongodb.org/mongo-driver/bson"
@@ -17,7 +16,7 @@ import (
 
 // Get all Events Route
 func GetAllEvents(c *fiber.Ctx) error {
-	var events []model.Event
+	var events []eventModel.Event
 	eventsCollection, e := database.GetCollection("zeus_Events", "Events")
 	if e != nil {
 		fmt.Println("Error: ", e)
@@ -42,7 +41,7 @@ func GetAllEvents(c *fiber.Ctx) error {
 
 // FIXME: Some of the data is not passsing in the database
 func CreateEvent(c *fiber.Ctx) error {
-	var event model.Event
+	var event eventModel.Event
 
 	c.BodyParser(&event)
 
@@ -59,6 +58,17 @@ func CreateEvent(c *fiber.Ctx) error {
 			"error": e.Error(),
 		})
 	}
+
+
+	var check eventModel.Event
+	eventsCollection.FindOne(context.Background(), bson.M{"slug": event.Slug}).Decode(&check)
+	if check.Slug == event.Slug {
+		c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Event already exists",
+		})
+		return nil
+	}
+
 	event.ID = primitive.NewObjectID()
 	res, err := eventsCollection.InsertOne(context.Background(), event)
 	if err != nil {
@@ -75,55 +85,8 @@ func CreateEvent(c *fiber.Ctx) error {
 	return nil
 }
 
-// TODO: Event Regsitration Route handler
-func RegisterForEvent(c *fiber.Ctx) error {
-	var user model.User
-	c.BodyParser(&user)
-
-	errors := validators.ValidateUser(user)
-	if errors != nil {
-		c.Status(fiber.StatusBadGateway).JSON(errors)
-		return nil
-	}
-
-	usersCollection, e := database.GetCollection("zeus_Events", "Users")
-	if e != nil {
-		fmt.Println("Error: ", e)
-		c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   e.Error(),
-			"message": "Collection Not found ⚠️",
-		})
-	}
-	user.ID = primitive.NewObjectID()
-	res, err := usersCollection.InsertOne(context.Background(), user)
-	if err != nil {
-		log.Println("Error", err)
-		c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"Success":     false,
-			"Inserted ID": res.InsertedID,
-		})
-		return err
-	}
-
-	senderEmail := os.Getenv("SENDER_EMAIL")
-
-	sesInput := model.SESInput{
-		TemplateName:  "newUser.html",
-		Subject:       "Registration Successfull",
-		Name:          user.Name,
-		RecieverEmail: user.Email,
-		SenderEmail:   senderEmail,
-	}
-
-	mailer.SendEmail(sesInput)
-
-	c.Status(fiber.StatusCreated).JSON(user)
-
-	return nil
-}
-
 func GetEventById(c *fiber.Ctx) error {
-	var event model.Event
+	var event eventModel.Event
 	var id = c.Query("id")
 	objId, _ := primitive.ObjectIDFromHex(id)
 	if id == "" {
@@ -154,7 +117,7 @@ func GetEventById(c *fiber.Ctx) error {
 }
 
 func GetEventBySlug(c *fiber.Ctx) error {
-	var event model.Event
+	var event eventModel.Event
 	var slug = c.Params("slug")
 
 	if slug == "" {
@@ -185,7 +148,7 @@ func GetEventBySlug(c *fiber.Ctx) error {
 }
 
 func GetEventUsers(c *fiber.Ctx) error {
-	var users []model.User
+	var users []userModel.User
 	var slug = c.Query("slug")
 
 	usersCollection, e := database.GetCollection("zeus_Events", "Users")

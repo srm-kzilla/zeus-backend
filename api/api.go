@@ -2,7 +2,8 @@ package api
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/srm-kzilla/events/api/events/controller"
+	eventController "github.com/srm-kzilla/events/api/events/controller"
+	userController "github.com/srm-kzilla/events/api/users/controller"
 )
 
 func handleRoot(c *fiber.Ctx) error {
@@ -12,10 +13,10 @@ func handleRoot(c *fiber.Ctx) error {
 func SetupApp(app *fiber.App) {
 	api := app.Group("/api")
 	api.Get("/", handleRoot)
-	api.Get("/event", controller.GetEventById)
-	api.Get("/event/:slug", controller.GetEventBySlug)
-	api.Get("/events", controller.GetAllEvents)
-	api.Get("/users", controller.GetEventUsers)
-	api.Post("/event", controller.CreateEvent)
-	api.Post("/register", controller.RegisterForEvent)
+	api.Get("/event", eventController.GetEventById)
+	api.Get("/event/:slug", eventController.GetEventBySlug)
+	api.Get("/events", eventController.GetAllEvents)
+	api.Get("/users", eventController.GetEventUsers)
+	api.Post("/event", eventController.CreateEvent)
+	api.Post("/register", userController.RegisterForEvent)
 }
