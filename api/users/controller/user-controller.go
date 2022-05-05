@@ -20,9 +20,14 @@ import (
 func RegisterForEvent(c *fiber.Ctx) error {
 	var reqBody userModel.RegisterUser
 	c.BodyParser(&reqBody)
+	
+	E := validators.ValidateRegisterUser(reqBody)
+	if E != nil {
+		c.Status(fiber.StatusBadGateway).JSON(E)
+		return nil
+	}
 
 	var user userModel.User = reqBody.User
-
 
 	errors := validators.ValidateUser((user))
 	if errors != nil {
@@ -34,7 +39,7 @@ func RegisterForEvent(c *fiber.Ctx) error {
 		fmt.Println("Error: ", e)
 		c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error":   e.Error(),
-			"message": "Collection Not found ⚠️",
+			"message": "Collection Not found",
 		})
 	}
 	eventsCollection, e := database.GetCollection("zeus_Events", "Events")
@@ -42,7 +47,7 @@ func RegisterForEvent(c *fiber.Ctx) error {
 		fmt.Println("Error: ", e)
 		c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error":   e.Error(),
-			"message": "Collection Not found ⚠️",
+			"message": "Collection Not found",
 		})
 	}
 	var event eventModel.Event
@@ -92,4 +97,70 @@ func RegisterForEvent(c *fiber.Ctx) error {
 	mailer.SendEmail(sesInput)
 	c.Status(fiber.StatusCreated).JSON(user)
 	return nil
+}
+
+func RsvpForEvent (c *fiber.Ctx) error {
+var reqBody userModel.RsvpUser
+c.BodyParser(&reqBody)
+
+E := validators.ValidateRsvpUser(reqBody)
+if E != nil {
+	c.Status(fiber.StatusBadGateway).JSON(E)
+	return nil
+}
+
+usersCollection, e := database.GetCollection("zeus_Events", "Users")
+if e != nil {
+	fmt.Println("Error: ", e)
+	c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+		"error":   e.Error(),
+		"message": "Collection Not found",
+	})
+}
+eventsCollection, e := database.GetCollection("zeus_Events", "Events")
+if e != nil {
+	fmt.Println("Error: ", e)
+	c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+		"error":   e.Error(),
+		"message": "Collection Not found",
+	})
+}
+var event eventModel.Event
+errr := eventsCollection.FindOne(context.Background(), bson.M{"slug": reqBody.EventSlug}).Decode(&event)
+if errr != nil {
+	c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
+		"error": "No such event/eventSlug exists",
+	})
+	return nil
+}
+var user userModel.User
+err := usersCollection.FindOne(context.Background(), bson.M{"email": reqBody.Email}).Decode(&user)
+if err != nil {
+	log.Println("Error", err)
+	c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+		"Success":     false,
+		"Error": 	 "User not found",
+	})
+	return nil
+}
+if !constants.ExistsInArray(user.EventSlugs, reqBody.EventSlug){
+	c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
+		"error":   "User not registered for this event",
+	})
+	return nil
+}
+
+if constants.ExistsInArray(event.RSVP_Users, reqBody.Email){
+c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
+	"error":   "User already RSVPed for this event",
+})
+return nil
+}
+event.RSVP_Users = append(event.RSVP_Users, reqBody.Email)
+eventsCollection.FindOneAndReplace(context.Background(), bson.M{"slug": reqBody.EventSlug}, event)
+c.Status(fiber.StatusOK).JSON(fiber.Map{
+	"Success":     true,
+	"Message": 		"User RSVPed for event",
+})
+return nil
 }

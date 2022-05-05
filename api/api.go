@@ -19,4 +19,5 @@ func SetupApp(app *fiber.App) {
 	api.Get("/users", eventController.GetEventUsers)
 	api.Post("/event", eventController.CreateEvent)
 	api.Post("/register", userController.RegisterForEvent)
+	api.Post("/rsvp", userController.RsvpForEvent)
 }

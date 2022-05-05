@@ -23,5 +23,5 @@ type Event struct {
 	StartDate   string             `json:"startDate" bson:"startDate"`
 	EventCover  string `validate:"required" json:"eventCover" bson:"eventCover"` // s3-url for event cover Image
 	IsCompleted bool   `json:"isCompleted" bson:"isCompleted"`
-	RSVP_Users []primitive.ObjectID `json:"rsvp_users" bson:"rsvp_users"`
+	RSVP_Users []string `json:"rsvp_users" bson:"rsvp_users"`
 }
