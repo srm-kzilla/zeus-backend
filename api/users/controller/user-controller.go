@@ -158,6 +158,14 @@ return nil
 }
 event.RSVP_Users = append(event.RSVP_Users, reqBody.Email)
 eventsCollection.FindOneAndReplace(context.Background(), bson.M{"slug": reqBody.EventSlug}, event)
+sesInput := mailer.SESInput{
+	TemplateName: "newUser.html",
+	Subject: "RSVP Successfull | will add QR later :)",
+	Name: user.Name,
+	RecieverEmail: user.Email,
+	SenderEmail: os.Getenv("SENDER_EMAIL"),
+}
+mailer.SendEmail(sesInput)
 c.Status(fiber.StatusOK).JSON(fiber.Map{
 	"Success":     true,
 	"Message": 		"User RSVPed for event",
