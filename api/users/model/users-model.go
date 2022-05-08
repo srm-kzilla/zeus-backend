@@ -22,12 +22,19 @@ type User struct {
 	EventSlugs   []string `json:"events" bson:"events"`
 }
 
-type RegisterUser struct {
+type RsvpUsers struct {
+	Email			string 	`json:"email" bson:"email"`
+	FoodReceived 	bool 	`json:"foodReceived" bson:"foodReceived"`
+	CheckedIn 		bool 	`json:"checkedIn" bson:"checkedIn"`
+}
+
+
+type RegisterUserReq struct {
 	User	User	`validate:"required" "json:"user" bson:"user"`
 	EventSlug	string	`validate:"required" json:"eventSlug" bson:"eventSlug"`
 }
 
-type RsvpUser struct {
+type RsvpUserReq struct {
 	Email string `validate:"required" json:"email" bson:"email"`
 	EventSlug string `validate:"required" json:"eventSlug" bson:"eventSlug"`
 }

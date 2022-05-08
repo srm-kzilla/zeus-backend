@@ -18,10 +18,10 @@ import (
 )
 
 func RegisterForEvent(c *fiber.Ctx) error {
-	var reqBody userModel.RegisterUser
+	var reqBody userModel.RegisterUserReq
 	c.BodyParser(&reqBody)
 	
-	E := validators.ValidateRegisterUser(reqBody)
+	E := validators.ValidateRegisterUserReq(reqBody)
 	if E != nil {
 		c.Status(fiber.StatusBadGateway).JSON(E)
 		return nil
@@ -100,10 +100,10 @@ func RegisterForEvent(c *fiber.Ctx) error {
 }
 
 func RsvpForEvent (c *fiber.Ctx) error {
-var reqBody userModel.RsvpUser
+var reqBody userModel.RsvpUserReq
 c.BodyParser(&reqBody)
 
-E := validators.ValidateRsvpUser(reqBody)
+E := validators.ValidateRsvpUserReq(reqBody)
 if E != nil {
 	c.Status(fiber.StatusBadGateway).JSON(E)
 	return nil
