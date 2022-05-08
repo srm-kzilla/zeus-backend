@@ -159,13 +159,19 @@ func GetEventUsers(c *fiber.Ctx) error {
 		})
 	}
 
-	cursor, err := usersCollection.Find(context.Background(), bson.M{"slug": slug})
+	cursor, err := usersCollection.Find(context.Background(), bson.M{"events": bson.M{"$in": []string{slug}}})
 	if err = cursor.All(context.Background(), &users); err != nil {
 		log.Println("Error ", err)
 		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
 			"error": err.Error(),
 			"users": users,
 		})
+	}
+	if len(users) == 0 {
+		c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error": "No users found",
+		})
+		return nil
 	}
 	c.Status((fiber.StatusOK)).JSON(users)
 
