@@ -120,7 +120,7 @@ func GetEventById(c *fiber.Ctx) error {
 
 func GetEventBySlug(c *fiber.Ctx) error {
 	var event eventModel.Event
-	var slug = c.Params("slug")
+	var slug = strings.ToLower(c.Params("slug"))
 
 	if slug == "" {
 		c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
