@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
 	eventModel "github.com/srm-kzilla/events/api/events/model"
@@ -70,6 +71,7 @@ func CreateEvent(c *fiber.Ctx) error {
 	}
 
 	event.ID = primitive.NewObjectID()
+	event.Slug = strings.ToLower(event.Slug)
 	res, err := eventsCollection.InsertOne(context.Background(), event)
 	if err != nil {
 		log.Println("Error", err)
