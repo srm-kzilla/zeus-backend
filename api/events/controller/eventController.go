@@ -61,6 +61,7 @@ func CreateEvent(c *fiber.Ctx) error {
 	}
 
 
+	event.Slug = strings.ToLower(event.Slug)
 	var check eventModel.Event
 	eventsCollection.FindOne(context.Background(), bson.M{"slug": event.Slug}).Decode(&check)
 	if check.Slug == event.Slug {
@@ -71,7 +72,6 @@ func CreateEvent(c *fiber.Ctx) error {
 	}
 
 	event.ID = primitive.NewObjectID()
-	event.Slug = strings.ToLower(event.Slug)
 	res, err := eventsCollection.InsertOne(context.Background(), event)
 	if err != nil {
 		log.Println("Error", err)
@@ -151,7 +151,7 @@ func GetEventBySlug(c *fiber.Ctx) error {
 
 func GetEventUsers(c *fiber.Ctx) error {
 	var users []userModel.User
-	var slug = c.Query("slug")
+	var slug = strings.ToLower(c.Query("slug"))
 
 	usersCollection, e := database.GetCollection("zeus_Events", "Users")
 	if e != nil {

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
 	eventModel "github.com/srm-kzilla/events/api/events/model"
@@ -28,6 +29,7 @@ func RegisterForEvent(c *fiber.Ctx) error {
 	}
 
 	var user userModel.User = reqBody.User
+	reqBody.EventSlug = strings.ToLower(reqBody.EventSlug)
 
 	errors := validators.ValidateUser((user))
 	if errors != nil {
@@ -102,6 +104,7 @@ func RegisterForEvent(c *fiber.Ctx) error {
 func RsvpForEvent (c *fiber.Ctx) error {
 var reqBody userModel.RsvpUserReq
 c.BodyParser(&reqBody)
+reqBody.EventSlug = strings.ToLower(reqBody.EventSlug)
 
 E := validators.ValidateRsvpUserReq(reqBody)
 if E != nil {
