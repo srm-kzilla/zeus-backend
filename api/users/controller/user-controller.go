@@ -60,6 +60,11 @@ func RegisterForEvent(c *fiber.Ctx) error {
 		})
 		return nil
 	}
+	if event.IsCompleted {
+		c.Status(fiber.StatusLocked).JSON(fiber.Map{
+			"error": "Event is already completed",
+		})
+	}
 	var check userModel.User
 	usersCollection.FindOne(context.Background(), bson.M{"email": user.Email}).Decode(&check)
 	if check.Email == user.Email {
@@ -135,6 +140,11 @@ if errr != nil {
 		"error": "No such event/eventSlug exists",
 	})
 	return nil
+}
+if event.IsCompleted {
+	c.Status(fiber.StatusLocked).JSON(fiber.Map{
+		"error": "Event is already completed",
+	})
 }
 var user userModel.User
 err := usersCollection.FindOne(context.Background(), bson.M{"email": reqBody.Email}).Decode(&user)
