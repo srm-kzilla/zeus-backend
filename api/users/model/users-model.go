@@ -18,7 +18,6 @@ type User struct {
 	Name        string `validate:"required" json:"name" bson:"name"`
 	Email       string `validate:"required,email" json:"email" bson:"email"`
 	PhoneNumber int    `validate:"required,min=10" json:"phoneNumber" bson:"phoneNumber"`
-	Feedback    string `json:"feedback" bson:"feedback"`
 	EventSlugs   []string `json:"events" bson:"events"`
 }
 
