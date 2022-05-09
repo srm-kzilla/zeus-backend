@@ -31,6 +31,7 @@ func SendEmail(sesInput SESInput) {
 
 	service := ses.New(sess)
 
+	if os.Getenv("ENV") == "prod" {
 	// Attempt to send the email.
 	_, err = service.SendEmail(emailTemplate)
 
@@ -52,6 +53,7 @@ func SendEmail(sesInput SESInput) {
 			// Message from an error.
 			fmt.Println(err.Error())
 		}
+	}
 	}
 
 	log.Printf("Email Sent to address: %s", sesInput.RecieverEmail)
