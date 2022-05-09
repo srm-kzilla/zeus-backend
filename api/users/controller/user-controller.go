@@ -64,6 +64,7 @@ func RegisterForEvent(c *fiber.Ctx) error {
 		c.Status(fiber.StatusLocked).JSON(fiber.Map{
 			"error": "Event is already completed",
 		})
+		return nil
 	}
 	var check userModel.User
 	usersCollection.FindOne(context.Background(), bson.M{"email": user.Email}).Decode(&check)
