@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
 	eventModel "github.com/srm-kzilla/events/api/events/model"
@@ -18,16 +19,17 @@ import (
 )
 
 func RegisterForEvent(c *fiber.Ctx) error {
-	var reqBody userModel.RegisterUser
+	var reqBody userModel.RegisterUserReq
 	c.BodyParser(&reqBody)
 	
-	E := validators.ValidateRegisterUser(reqBody)
+	E := validators.ValidateRegisterUserReq(reqBody)
 	if E != nil {
 		c.Status(fiber.StatusBadGateway).JSON(E)
 		return nil
 	}
 
 	var user userModel.User = reqBody.User
+	reqBody.EventSlug = strings.ToLower(reqBody.EventSlug)
 
 	errors := validators.ValidateUser((user))
 	if errors != nil {
@@ -55,6 +57,12 @@ func RegisterForEvent(c *fiber.Ctx) error {
 	if err != nil {
 		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
 			"error": "No such event/eventSlug exists",
+		})
+		return nil
+	}
+	if event.IsCompleted {
+		c.Status(fiber.StatusLocked).JSON(fiber.Map{
+			"error": "Event is already completed",
 		})
 		return nil
 	}
@@ -100,10 +108,11 @@ func RegisterForEvent(c *fiber.Ctx) error {
 }
 
 func RsvpForEvent (c *fiber.Ctx) error {
-var reqBody userModel.RsvpUser
+var reqBody userModel.RsvpUserReq
 c.BodyParser(&reqBody)
+reqBody.EventSlug = strings.ToLower(reqBody.EventSlug)
 
-E := validators.ValidateRsvpUser(reqBody)
+E := validators.ValidateRsvpUserReq(reqBody)
 if E != nil {
 	c.Status(fiber.StatusBadGateway).JSON(E)
 	return nil
@@ -132,6 +141,11 @@ if errr != nil {
 		"error": "No such event/eventSlug exists",
 	})
 	return nil
+}
+if event.IsCompleted {
+	c.Status(fiber.StatusLocked).JSON(fiber.Map{
+		"error": "Event is already completed",
+	})
 }
 var user userModel.User
 err := usersCollection.FindOne(context.Background(), bson.M{"email": reqBody.Email}).Decode(&user)

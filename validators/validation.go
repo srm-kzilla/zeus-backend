@@ -2,8 +2,8 @@ package validators
 
 import (
 	"github.com/go-playground/validator/v10"
-	userModel "github.com/srm-kzilla/events/api/users/model"
 	eventModel "github.com/srm-kzilla/events/api/events/model"
+	userModel "github.com/srm-kzilla/events/api/users/model"
 )
 
 type ErrorResponse struct {
@@ -63,7 +63,7 @@ func ValidateSpeaker(speaker eventModel.Speaker) []*ErrorResponse {
 	return errors
 }
 
-func ValidateRegisterUser(reqBody userModel.RegisterUser) []*ErrorResponse {
+func ValidateRegisterUserReq(reqBody userModel.RegisterUserReq) []*ErrorResponse {
 	var errors []*ErrorResponse
 	validate := validator.New()
 	err := validate.Struct(reqBody)
@@ -79,7 +79,7 @@ func ValidateRegisterUser(reqBody userModel.RegisterUser) []*ErrorResponse {
 	return errors
 }
 
-func ValidateRsvpUser(reqBody userModel.RsvpUser) []*ErrorResponse {
+func ValidateRsvpUserReq(reqBody userModel.RsvpUserReq) []*ErrorResponse {
 	var errors []*ErrorResponse
 	validate := validator.New()
 	err := validate.Struct(reqBody)

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
 	eventModel "github.com/srm-kzilla/events/api/events/model"
@@ -60,6 +61,7 @@ func CreateEvent(c *fiber.Ctx) error {
 	}
 
 
+	event.Slug = strings.ToLower(event.Slug)
 	var check eventModel.Event
 	eventsCollection.FindOne(context.Background(), bson.M{"slug": event.Slug}).Decode(&check)
 	if check.Slug == event.Slug {
@@ -118,7 +120,7 @@ func GetEventById(c *fiber.Ctx) error {
 
 func GetEventBySlug(c *fiber.Ctx) error {
 	var event eventModel.Event
-	var slug = c.Params("slug")
+	var slug = strings.ToLower(c.Params("slug"))
 
 	if slug == "" {
 		c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -149,7 +151,7 @@ func GetEventBySlug(c *fiber.Ctx) error {
 
 func GetEventUsers(c *fiber.Ctx) error {
 	var users []userModel.User
-	var slug = c.Query("slug")
+	var slug = strings.ToLower(c.Query("slug"))
 
 	usersCollection, e := database.GetCollection("zeus_Events", "Users")
 	if e != nil {
@@ -175,5 +177,34 @@ func GetEventUsers(c *fiber.Ctx) error {
 	}
 	c.Status((fiber.StatusOK)).JSON(users)
 
+	return nil
+}
+
+func CloseEvent(c *fiber.Ctx) error {
+	var event eventModel.Event
+	var slug = strings.ToLower(c.Query("slug"))
+	eventsCollection, e := database.GetCollection("zeus_Events", "Events")
+	if e != nil {
+		fmt.Println("Error: ", e)
+		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
+			"error": e.Error(),
+		})
+		return nil
+	}
+	err := eventsCollection.FindOne(context.Background(), bson.M{"slug": slug}).Decode(&event)
+	if err != nil {
+		log.Println("Error ", err)
+		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+		return nil
+	}
+	event.IsCompleted = true
+	eventsCollection.FindOneAndReplace(context.Background(), bson.M{"slug": slug}, event)
+	c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"success": true,
+		"event":   event,
+		"message":"Event is successfully closed",
+	})
 	return nil
 }
