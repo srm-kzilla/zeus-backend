@@ -18,16 +18,21 @@ type User struct {
 	Name        string             `validate:"required" json:"name" bson:"name"`
 	Email       string             `validate:"required,email" json:"email" bson:"email"`
 	PhoneNumber int                `validate:"required,min=1000000000,max=9999999999" json:"phoneNumber" bson:"phoneNumber"`
-	Feedback    string             `json:"feedback" bson:"feedback"`
 	EventSlugs  []string           `json:"events" bson:"events"`
 }
 
-type RegisterUser struct {
+type RsvpUsers struct {
+	Email        string `json:"email" bson:"email"`
+	FoodReceived bool   `json:"foodReceived" bson:"foodReceived"`
+	CheckedIn    bool   `json:"checkedIn" bson:"checkedIn"`
+}
+
+type RegisterUserReq struct {
 	User      User   `validate:"required" "json:"user" bson:"user"`
 	EventSlug string `validate:"required" json:"eventSlug" bson:"eventSlug"`
 }
 
-type RsvpUser struct {
+type RsvpUserReq struct {
 	Email     string `validate:"required" json:"email" bson:"email"`
 	EventSlug string `validate:"required" json:"eventSlug" bson:"eventSlug"`
 }
