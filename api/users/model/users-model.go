@@ -15,19 +15,19 @@ import (
 
 type User struct {
 	ID          primitive.ObjectID `json:"_id" bson:"_id"`
-	Name        string `validate:"required" json:"name" bson:"name"`
-	Email       string `validate:"required,email" json:"email" bson:"email"`
-	PhoneNumber int    `validate:"required,min=10" json:"phoneNumber" bson:"phoneNumber"`
-	Feedback    string `json:"feedback" bson:"feedback"`
-	EventSlugs   []string `json:"events" bson:"events"`
+	Name        string             `validate:"required" json:"name" bson:"name"`
+	Email       string             `validate:"required,email" json:"email" bson:"email"`
+	PhoneNumber int                `validate:"required,min=1000000000,max=9999999999" json:"phoneNumber" bson:"phoneNumber"`
+	Feedback    string             `json:"feedback" bson:"feedback"`
+	EventSlugs  []string           `json:"events" bson:"events"`
 }
 
 type RegisterUser struct {
-	User	User	`validate:"required" "json:"user" bson:"user"`
-	EventSlug	string	`validate:"required" json:"eventSlug" bson:"eventSlug"`
+	User      User   `validate:"required" "json:"user" bson:"user"`
+	EventSlug string `validate:"required" json:"eventSlug" bson:"eventSlug"`
 }
 
 type RsvpUser struct {
-	Email string `validate:"required" json:"email" bson:"email"`
+	Email     string `validate:"required" json:"email" bson:"email"`
 	EventSlug string `validate:"required" json:"eventSlug" bson:"eventSlug"`
 }
