@@ -170,7 +170,9 @@ c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
 })
 return nil
 }
-event.RSVP_Users = append(event.RSVP_Users, reqBody.Email)
+var rsvpUser userModel.RsvpUsers
+rsvpUser.Email = reqBody.Email
+event.RSVP_Users = append(event.RSVP_Users, rsvpUser)
 eventsCollection.FindOneAndReplace(context.Background(), bson.M{"slug": reqBody.EventSlug}, event)
 sesInput := mailer.SESInput{
 	TemplateName: "newUser.html",

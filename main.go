@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -11,16 +12,24 @@ import (
 	api "github.com/srm-kzilla/events/api"
 )
 
+var startTime time.Time
+
 func rootFunction(c *fiber.Ctx) error {
 	return c.JSON(map[string]string{"message": "Welcome to the Zeus API"})
 }
 
+func healthCheck(c *fiber.Ctx) error {
+	return c.JSON(map[string]string{"message": "OK", "uptime": time.Since(startTime).String()})
+}
+
 func setupRoutes(app *fiber.App) {
 	app.Get("/", rootFunction)
+	app.Get("/health", healthCheck)
 	api.SetupApp(app)
 }
 
 func init() {
+	startTime = time.Now()
 	err := godotenv.Load()
 	if err != nil {
 		log.Panicln(err)
