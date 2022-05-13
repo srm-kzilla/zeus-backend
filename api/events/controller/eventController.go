@@ -1,11 +1,11 @@
 package eventController
 
 import (
-	"bytes"
 	"context"
 	"fmt"
-	"io"
+	"io/ioutil"
 	"log"
+	// "os"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
@@ -221,15 +221,15 @@ func UploadEventCover(c *fiber.Ctx) error {
 		return nil
 	}
 	fileBody, _ := file.Open()
-	buf := bytes.NewBuffer(nil)
-	_, e := io.Copy(buf, fileBody)
-	if e != nil {
+	buf, e := ioutil.ReadAll(fileBody)
+		if e != nil {
 		c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": err.Error(),
 		})
 		return nil
 	}
-	S3.UploadFile(buf.Bytes(), file.Filename, file.Size)
+	// os.WriteFile(file.Filename, buf, 0644)
+	S3.UploadFile(buf, file.Filename, file.Size)
 	c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
 		"message": "File uploaded successfully",
