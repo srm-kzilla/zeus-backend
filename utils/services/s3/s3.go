@@ -34,8 +34,10 @@ func ListBuckets() (resp *s3.ListBucketsOutput) {
 	return resp
 }
 
-func UploadFile(session *session.Session, fileBuffer []byte, name string, fileSize int64) error {
-	_, err := s3.New(session).PutObject(&s3.PutObjectInput{
+func UploadFile(fileBuffer []byte, name string, fileSize int64) error {
+	initialize()
+	fmt.Println("sending...")
+	res, err := s3Session.PutObject(&s3.PutObjectInput{
 		Bucket:               aws.String(os.Getenv("AWS_BUCKET_NAME")),
 		Key:                  aws.String(name),
 		ACL:                  aws.String("public"),
@@ -45,5 +47,6 @@ func UploadFile(session *session.Session, fileBuffer []byte, name string, fileSi
 		ContentDisposition:   aws.String("attachment"),
 		ServerSideEncryption: aws.String("AES256"),
 	})
+	fmt.Println(res)
 	return err
 }

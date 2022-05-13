@@ -1,8 +1,10 @@
 package eventController
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"log"
 	"strings"
 
@@ -10,6 +12,7 @@ import (
 	eventModel "github.com/srm-kzilla/events/api/events/model"
 	userModel "github.com/srm-kzilla/events/api/users/model"
 	"github.com/srm-kzilla/events/database"
+	S3 "github.com/srm-kzilla/events/utils/services/s3"
 	"github.com/srm-kzilla/events/validators"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -217,7 +220,16 @@ func UploadEventCover(c *fiber.Ctx) error {
 		})
 		return nil
 	}
-	c.SaveFile(file, fmt.Sprintf("./uploads/%s", file.Filename))
+	fileBody, _ := file.Open()
+	buf := bytes.NewBuffer(nil)
+	_, e := io.Copy(buf, fileBody)
+	if e != nil {
+		c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+		return nil
+	}
+	S3.UploadFile(buf.Bytes(), file.Filename, file.Size)
 	c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
 		"message": "File uploaded successfully",
