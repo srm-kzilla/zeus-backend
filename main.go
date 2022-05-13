@@ -1,28 +1,35 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/joho/godotenv"
 	api "github.com/srm-kzilla/events/api"
-	S3 "github.com/srm-kzilla/events/utils/services/s3"
 )
+
+var startTime time.Time
 
 func rootFunction(c *fiber.Ctx) error {
 	return c.JSON(map[string]string{"message": "Welcome to the Zeus API"})
 }
 
+func healthCheck(c *fiber.Ctx) error {
+	return c.JSON(map[string]string{"message": "OK", "uptime": time.Since(startTime).String()})
+}
+
 func setupRoutes(app *fiber.App) {
 	app.Get("/", rootFunction)
+	app.Get("/health", healthCheck)
 	api.SetupApp(app)
 }
 
 func init() {
+	startTime = time.Now()
 	err := godotenv.Load()
 	if err != nil {
 		log.Panicln(err)
@@ -41,8 +48,6 @@ func main() {
 
 	// setting up api routes
 	setupRoutes(app)
-
-	fmt.Println(S3.ListBuckets())
 
 	//Setting up Port Value
 	port := os.Getenv("PORT")

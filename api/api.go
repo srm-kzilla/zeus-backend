@@ -21,4 +21,5 @@ func SetupApp(app *fiber.App) {
 	api.Post("/register", userController.RegisterForEvent)
 	api.Post("/rsvp", userController.RsvpForEvent)
 	api.Post("/event/close", eventController.CloseEvent)
+	api.Post("/event/upload/cover", eventController.UploadEventCover)
 }

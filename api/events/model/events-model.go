@@ -13,6 +13,7 @@ type Speaker struct {
 	GithubLink string 			`json:"githubLink" bson:"githubLink"`
 	LinkedIn   string 			`json:"linkedIn" bson:"linkedIn"`
 	EventSlug  string 			`validate:"required" json:"slug" bson:"slug"`
+	Picture	string 			`json:"picture" bson:"picture"`
 }
 
 

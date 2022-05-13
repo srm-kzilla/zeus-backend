@@ -208,3 +208,19 @@ func CloseEvent(c *fiber.Ctx) error {
 	})
 	return nil
 }
+
+func UploadEventCover(c *fiber.Ctx) error {
+	file, err := c.FormFile("cover")
+	if err != nil {
+		c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+		return nil
+	}
+	c.SaveFile(file, fmt.Sprintf("./uploads/%s", file.Filename))
+	c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"success": true,
+		"message": "File uploaded successfully",
+	})
+	return nil
+}
