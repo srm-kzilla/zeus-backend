@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 
@@ -9,6 +10,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/joho/godotenv"
 	api "github.com/srm-kzilla/events/api"
+	S3 "github.com/srm-kzilla/events/utils/services/s3"
 )
 
 func rootFunction(c *fiber.Ctx) error {
@@ -39,6 +41,8 @@ func main() {
 
 	// setting up api routes
 	setupRoutes(app)
+
+	fmt.Println(S3.ListBuckets())
 
 	//Setting up Port Value
 	port := os.Getenv("PORT")
