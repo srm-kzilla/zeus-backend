@@ -10,3 +10,8 @@ type InEventData struct {
 	EventSlug    string             `validate:"required" json:"eventSlug" bson:"eventSlug"`
 	FoodReceived bool               `validate:"required" json:"foodReceived" bson:"foodReceived"`
 }
+
+type AttendanceQuery struct {
+	Email string `query:"email"`
+	Slug  string `query:"slug"`
+}
