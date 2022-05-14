@@ -5,13 +5,14 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	// "os"
+	"os"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
 	eventModel "github.com/srm-kzilla/events/api/events/model"
 	userModel "github.com/srm-kzilla/events/api/users/model"
 	"github.com/srm-kzilla/events/database"
+	helpers "github.com/srm-kzilla/events/utils/helpers"
 	S3 "github.com/srm-kzilla/events/utils/services/s3"
 	"github.com/srm-kzilla/events/validators"
 	"go.mongodb.org/mongo-driver/bson"
@@ -213,6 +214,13 @@ func CloseEvent(c *fiber.Ctx) error {
 }
 
 func UploadEventCover(c *fiber.Ctx) error {
+	var slug  = c.Query("slug")
+	if slug == "" {
+		c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Slug is required",
+		})
+		return nil
+	}
 	file, err := c.FormFile("cover")
 	if err != nil {
 		c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -228,11 +236,15 @@ func UploadEventCover(c *fiber.Ctx) error {
 		})
 		return nil
 	}
-	// os.WriteFile(file.Filename, buf, 0644)
-	S3.UploadFile(buf, file.Filename, file.Size)
+	
+	
+	file.Filename = fmt.Sprintf("%s/covers/%s.%s", slug, helpers.GenerateNanoID(10), strings.Split(file.Filename, ".")[1])
+	var filePath string = "./"+file.Filename
+	S3.UploadFile(buf, filePath, file.Size)
 	c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
 		"message": "File uploaded successfully",
+		"key": os.Getenv("S3_LINK") + file.Filename,
 	})
 	return nil
 }

@@ -7,8 +7,8 @@ import (
 )
 
 func GenerateQRCode(data string) {
-	err := qrcode.WriteFile(data, qrcode.Medium, 256, "qr.png")
-	
+	err := qrcode.WriteFile(data, qrcode.Medium, 256, "qr.svg")
+	// png, err := qrcode.Encode("https://example.org", qrcode.Medium, 256)
 	if err != nil {
 		log.Println("Error: ", err)
 	}
