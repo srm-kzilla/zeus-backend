@@ -103,6 +103,12 @@ func InEventHandler(c *fiber.Ctx) error {
 	}
 	email := attendanceQuery.Email
 	slug := attendanceQuery.Slug
+	if &email == nil || &slug == nil {
+		fmt.Println("Email or slug missing")
+		c.Status(400).JSON(fiber.Map{
+			"message": "Email or slug missing",
+		})
+	}
 	fmt.Println("Email", email)
 	fmt.Println("Slug", slug)
 	var userData userModel.User
