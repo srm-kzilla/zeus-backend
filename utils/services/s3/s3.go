@@ -3,7 +3,6 @@ package S3
 import (
 	"bytes"
 	"fmt"
-	"net/http"
 	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -34,16 +33,20 @@ func ListBuckets() (resp *s3.ListBucketsOutput) {
 	return resp
 }
 
-func UploadFile(session *session.Session, fileBuffer []byte, name string, fileSize int64) error {
-	_, err := s3.New(session).PutObject(&s3.PutObjectInput{
-		Bucket:               aws.String(os.Getenv("AWS_BUCKET_NAME")),
-		Key:                  aws.String(name),
-		ACL:                  aws.String("public"),
-		Body:                 bytes.NewReader(fileBuffer),
-		ContentLength:        aws.Int64(fileSize),
-		ContentType:          aws.String(http.DetectContentType(fileBuffer)),
-		ContentDisposition:   aws.String("attachment"),
-		ServerSideEncryption: aws.String("AES256"),
+func UploadFile(file []byte, name string, fileSize int64) error {
+	initialize()
+	fmt.Println("sending...")
+	res, err := s3Session.PutObject(&s3.PutObjectInput{
+		Bucket: aws.String(os.Getenv("AWS_BUCKET_NAME")),
+		Key: aws.String(name),
+		Body: bytes.NewReader(file),
+		ACL: aws.String("public-read"),
+		ContentLength: aws.Int64(fileSize),
 	})
-	return err
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	fmt.Println(res)
+	return nil
 }
