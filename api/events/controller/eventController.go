@@ -3,13 +3,17 @@ package eventController
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
 	"log"
+	"os"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
 	eventModel "github.com/srm-kzilla/events/api/events/model"
 	userModel "github.com/srm-kzilla/events/api/users/model"
 	"github.com/srm-kzilla/events/database"
+	helpers "github.com/srm-kzilla/events/utils/helpers"
+	S3 "github.com/srm-kzilla/events/utils/services/s3"
 	"github.com/srm-kzilla/events/validators"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -40,7 +44,6 @@ func GetAllEvents(c *fiber.Ctx) error {
 	return nil
 }
 
-// FIXME: Some of the data is not passsing in the database
 func CreateEvent(c *fiber.Ctx) error {
 	var event eventModel.Event
 
@@ -210,6 +213,13 @@ func CloseEvent(c *fiber.Ctx) error {
 }
 
 func UploadEventCover(c *fiber.Ctx) error {
+	var slug  = c.Query("slug")
+	if slug == "" {
+		c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Slug is required",
+		})
+		return nil
+	}
 	file, err := c.FormFile("cover")
 	if err != nil {
 		c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -217,10 +227,78 @@ func UploadEventCover(c *fiber.Ctx) error {
 		})
 		return nil
 	}
-	c.SaveFile(file, fmt.Sprintf("./uploads/%s", file.Filename))
+	fileBody, _ := file.Open()
+	buf, e := ioutil.ReadAll(fileBody)
+		if e != nil {
+		c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+		return nil
+	}
+	
+	
+	file.Filename = fmt.Sprintf("%s/covers/%s.%s", slug, helpers.GenerateNanoID(10), strings.Split(file.Filename, ".")[1])
+	var filePath string = "./"+file.Filename
+	S3.UploadFile(buf, filePath, file.Size)
 	c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
 		"message": "File uploaded successfully",
+		"key": os.Getenv("S3_LINK") + file.Filename,
 	})
+	return nil
+}
+
+func AddSpeaker(c *fiber.Ctx) error {
+	var speaker eventModel.Speaker
+
+	c.BodyParser(&speaker)
+
+	errors := validators.ValidateSpeaker(speaker)
+	if errors != nil {
+		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
+			"error": errors,
+		})
+		return nil
+	}
+
+	speaker.EventSlug = strings.ToLower(speaker.EventSlug)
+	eventsCollection, e := database.GetCollection("zeus_Events", "Events")
+	if e != nil {
+		fmt.Println("Error: ", e)
+		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
+			"error": e.Error(),
+		})
+		return nil
+	}
+	var event eventModel.Event
+	err := eventsCollection.FindOne(context.Background(), bson.M{"slug": speaker.EventSlug}).Decode(&event)
+	if err != nil {
+		log.Println("Error ", err)
+		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
+			"error": "no such event/eventSlug exists",
+		})
+		return nil
+	}
+	speaker.ID = primitive.NewObjectID()
+	speakerCollection, e := database.GetCollection("zeus_Events", "Speakers")
+	if e != nil {
+		fmt.Println("Error: ", e)
+		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
+			"error": e.Error(),
+		})
+		return nil
+	}
+	res, err := speakerCollection.InsertOne(context.Background(), speaker)
+	if err != nil {
+		log.Println("Error ", err)
+		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
+			"error": err.Error(),
+			"InsertedId": res.InsertedID,
+		})
+		return nil
+	}
+
+	c.Status(fiber.StatusOK).JSON(speaker)
+
 	return nil
 }
