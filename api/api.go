@@ -3,6 +3,7 @@ package api
 import (
 	"github.com/gofiber/fiber/v2"
 	eventController "github.com/srm-kzilla/events/api/events/controller"
+	inEventController "github.com/srm-kzilla/events/api/inEvent/controller"
 	userController "github.com/srm-kzilla/events/api/users/controller"
 )
 
@@ -21,6 +22,7 @@ func SetupApp(app *fiber.App) {
 	api.Post("/register", userController.RegisterForEvent)
 	api.Post("/rsvp", userController.RsvpForEvent)
 	api.Post("/event/close", eventController.CloseEvent)
+	api.Get("/inEvent/:action", inEventController.InEventHandler)
 	api.Post("/event/upload/cover", eventController.UploadEventCover)
 	api.Post("/event/speaker", eventController.AddSpeaker)
 }
