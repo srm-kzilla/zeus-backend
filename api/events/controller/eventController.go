@@ -44,7 +44,6 @@ func GetAllEvents(c *fiber.Ctx) error {
 	return nil
 }
 
-// FIXME: Some of the data is not passsing in the database
 func CreateEvent(c *fiber.Ctx) error {
 	var event eventModel.Event
 
@@ -246,5 +245,60 @@ func UploadEventCover(c *fiber.Ctx) error {
 		"message": "File uploaded successfully",
 		"key": os.Getenv("S3_LINK") + file.Filename,
 	})
+	return nil
+}
+
+func AddSpeaker(c *fiber.Ctx) error {
+	var speaker eventModel.Speaker
+
+	c.BodyParser(&speaker)
+
+	errors := validators.ValidateSpeaker(speaker)
+	if errors != nil {
+		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
+			"error": errors,
+		})
+		return nil
+	}
+
+	speaker.EventSlug = strings.ToLower(speaker.EventSlug)
+	eventsCollection, e := database.GetCollection("zeus_Events", "Events")
+	if e != nil {
+		fmt.Println("Error: ", e)
+		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
+			"error": e.Error(),
+		})
+		return nil
+	}
+	var event eventModel.Event
+	err := eventsCollection.FindOne(context.Background(), bson.M{"slug": speaker.EventSlug}).Decode(&event)
+	if err != nil {
+		log.Println("Error ", err)
+		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
+			"error": "no such event/eventSlug exists",
+		})
+		return nil
+	}
+	speaker.ID = primitive.NewObjectID()
+	speakerCollection, e := database.GetCollection("zeus_Events", "Speakers")
+	if e != nil {
+		fmt.Println("Error: ", e)
+		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
+			"error": e.Error(),
+		})
+		return nil
+	}
+	res, err := speakerCollection.InsertOne(context.Background(), speaker)
+	if err != nil {
+		log.Println("Error ", err)
+		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
+			"error": err.Error(),
+			"InsertedId": res.InsertedID,
+		})
+		return nil
+	}
+
+	c.Status(fiber.StatusOK).JSON(speaker)
+
 	return nil
 }
