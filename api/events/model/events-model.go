@@ -9,12 +9,12 @@ import (
 type Speaker struct {
 	ID 	     primitive.ObjectID 	`json:"_id" bson:"_id"`
 	Name       string				`validate:"required" json:"name" bson:"name"`
-	Email      string 			`validate:"required" json:"email" bson:"email"`
-	GithubLink string 			`json:"githubLink" bson:"githubLink"`
-	LinkedIn   string 			`validate:"required" ejson:"linkedIn" bson:"linkedIn"`
-	EventSlug  string 			`validate:"required" json:"slug" bson:"slug"`
-	Image	   string 			`json:"image" bson:"image"`
-	About	   string			`json:"about" bson:"about"`
+	Email      string 				`validate:"required" json:"email" bson:"email"`
+	EventSlug  string 				`validate:"required" json:"slug" bson:"slug"`
+	LinkedIn   string 				`validate:"required" ejson:"linkedIn" bson:"linkedIn"`
+	GithubLink string 				`json:"githubLink" bson:"githubLink"`
+	Image	   string 				`json:"image" bson:"image"`
+	About	   string				`json:"about" bson:"about"`
 }
 
 type Timeline struct {
@@ -31,16 +31,21 @@ type Prizes struct {
 }
 
 type Event struct {
-	ID          primitive.ObjectID 	`json:"_id" bson:"_id"`
-	Title       string             	`validate:"required" json:"title" bson:"title"`
-	Slug        string             	`validate:"required" json:"slug" bson:"slug"`
-	Description string             	`validate:"required" json:"description" bson:"description"`
-	Tagline		string				`validate:"required" json:"tagline" bson:"tagline"`
-	Timeline	[]Timeline			`validate:"required" json:"timeline" bson:"timeline"`
-	Prizes		[]Prizes			`validate:"required" json:"prizes" bson:"prizes"`
+	ID          primitive.ObjectID 		`json:"_id" bson:"_id"`
+	Title       string             		`validate:"required" json:"title" bson:"title"`
+	Slug        string             		`validate:"required" json:"slug" bson:"slug"`
+	Description string             		`validate:"required" json:"description" bson:"description"`
+	Tagline		string					`validate:"required" json:"tagline" bson:"tagline"`
+	Timeline	[]Timeline				`validate:"required" json:"timeline" bson:"timeline"`
+	Prizes		[]Prizes				`validate:"required" json:"prizes" bson:"prizes"`
 	Icons	    []string           		`json:"icons" bson:"icons"`
-	StartDate   string             	`validate:"required" json:"startDate" bson:"startDate"`
-	EventCover  string 			`validate:"required" json:"eventCover" bson:"eventCover"` // s3-url for event cover Image
-	IsCompleted bool   			`json:"isCompleted" bson:"isCompleted"`
-	RSVP_Users []userModel.RsvpUsers 			`json:"rsvp_users" bson:"rsvp_users"`
+	StartDate   string             		`validate:"required" json:"startDate" bson:"startDate"`
+	EventCover  string 					`validate:"required" json:"eventCover" bson:"eventCover"`
+	IsCompleted bool   					`json:"isCompleted" bson:"isCompleted"`
+	RSVP_Users  []userModel.RsvpUsers 	`json:"rsvp_users" bson:"rsvp_users"`
+}
+
+type EventWithSpeakers struct {
+	Event
+	Speakers []Speaker	`json:"speakers" bson:"speakers"`
 }

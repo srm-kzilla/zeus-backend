@@ -1,6 +1,8 @@
 package mailer
 
 import (
+	"fmt"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ses"
 )
@@ -8,7 +10,7 @@ import (
 func GenerateSESTemplate(input SESInput) (template *ses.SendEmailInput) {
 
 	html := getHTMLTemplate(input.Name, input.TemplateName)
-
+	fmt.Println(html)
 	title := input.Subject
 
 	template = &ses.SendEmailInput{

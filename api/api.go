@@ -19,6 +19,7 @@ func SetupApp(app *fiber.App) {
 	api.Get("/events", eventController.GetAllEvents)
 	api.Get("/users", eventController.GetEventUsers)
 	api.Post("/event", eventController.CreateEvent)
+	api.Put("/event", eventController.UpdateEvent)
 	api.Post("/register", userController.RegisterForEvent)
 	api.Post("/rsvp", userController.RsvpForEvent)
 	api.Post("/event/close", eventController.CloseEvent)
