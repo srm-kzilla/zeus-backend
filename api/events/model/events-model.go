@@ -7,7 +7,7 @@ import (
 )
 
 type Speaker struct {
-	ID 	     primitive.ObjectID 	`json:"_id" bson:"_id"`
+	ID 	       primitive.ObjectID 	`json:"_id" bson:"_id"`
 	Name       string				`validate:"required" json:"name" bson:"name"`
 	Email      string 				`json:"email" bson:"email"`
 	EventSlug  string 				`validate:"required" json:"slug" bson:"slug"`

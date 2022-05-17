@@ -31,4 +31,5 @@ func SetupApp(app *fiber.App) {
 	protected.Get("/inEvent/:action", inEventController.InEventHandler)
 	protected.Post("/upload", eventController.UploadEventCover)
 	protected.Post("/event/speaker", eventController.AddSpeaker)
+	protected.Put("/event/speaker", eventController.UpdateSpeaker)
 }
