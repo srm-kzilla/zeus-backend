@@ -228,7 +228,7 @@ func UploadEventCover(c *fiber.Ctx) error {
 		})
 		return nil
 	}
-	file, err := c.FormFile("cover")
+	file, err := c.FormFile("file")
 	if err != nil {
 		c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": err.Error(),
