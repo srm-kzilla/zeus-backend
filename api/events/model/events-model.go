@@ -9,9 +9,9 @@ import (
 type Speaker struct {
 	ID 	     primitive.ObjectID 	`json:"_id" bson:"_id"`
 	Name       string				`validate:"required" json:"name" bson:"name"`
-	Email      string 				`validate:"required" json:"email" bson:"email"`
+	Email      string 				`json:"email" bson:"email"`
 	EventSlug  string 				`validate:"required" json:"slug" bson:"slug"`
-	LinkedIn   string 				`validate:"required" ejson:"linkedIn" bson:"linkedIn"`
+	LinkedIn   string 				`json:"linkedIn" bson:"linkedIn"`
 	GithubLink string 				`json:"githubLink" bson:"githubLink"`
 	Image	   string 				`json:"image" bson:"image"`
 	About	   string				`json:"about" bson:"about"`
