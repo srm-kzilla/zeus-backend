@@ -17,6 +17,7 @@ func SetupApp(app *fiber.App) {
 	api.Get("/", handleRoot)
 	api.Post("/admin/register", authController.RegisterAdmin)
 	api.Post("/admin/login", authController.LoginAdmin)
+	api.Post("/admin/refresh", authController.RefreshAdmin)
 	api.Get("/event", eventController.GetEventById)
 	api.Get("/event/:slug", eventController.GetEventBySlug)
 	api.Get("/events", eventController.GetAllEvents)

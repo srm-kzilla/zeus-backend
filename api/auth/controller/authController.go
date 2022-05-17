@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gofiber/fiber/v2"
 	authModel "github.com/srm-kzilla/events/api/auth/model"
 	authService "github.com/srm-kzilla/events/api/auth/service"
@@ -98,5 +99,52 @@ func LoginAdmin(c *fiber.Ctx)error {
 		"token":	token,
 		"refresh":	refresh,
 		"email": user.Email,
+	})
+}
+
+func RefreshAdmin(c *fiber.Ctx)error {
+	refreshToken := c.GetReqHeaders()["X-Refresh-Token"]
+	if refreshToken == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "No refresh token provided",
+		})
+	}
+
+	token, err := authService.AuthenticateRefresh(refreshToken)
+	if err != nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"success": false,
+			"message":"Invalid refresh token",
+		})
+	}
+	claims := token.Claims.(*jwt.StandardClaims)
+	var email string = claims.Issuer
+
+	adminCollection, err := database.GetCollection("zeus_Events", "Admin")
+	if err != nil {
+		return c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	var check authModel.User
+	error := adminCollection.FindOne(context.Background(), bson.M{"email": email}).Decode(&check)
+	if error != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Email does not exist",
+		})
+	}
+	accessToken, err := authService.GenerateToken(email)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"success": true,
+		"message": "Refresh successful",
+		"token": accessToken,
+		"refresh":refreshToken,
 	})
 }
