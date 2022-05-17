@@ -38,8 +38,8 @@ func GenerateRefreshToken(email string)(string,error){
 	return token, nil
 }
 
-func AuthenticateRefresh(token string)(*jwt.Token, error){
+func AutheticateToken(token string, secretKey string)(*jwt.Token, error){
 	return jwt.ParseWithClaims(token, &jwt.StandardClaims{}, func(t *jwt.Token) (interface{}, error) {
-		return []byte(os.Getenv("REFRESH")),nil
+		return []byte(os.Getenv(secretKey)),nil
 	})
 }
