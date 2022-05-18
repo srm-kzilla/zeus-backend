@@ -327,7 +327,11 @@ func UpdateEvent(c *fiber.Ctx) error {
 		c.Status(fiber.StatusBadGateway).JSON(errors)
 		return nil
 	}
-
+	if event.ID == primitive.NilObjectID {
+		return c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
+			"error": "ObjectID is required",
+		})
+	}
 	eventsCollection, e := database.GetCollection("zeus_Events", "Events")
 	if e != nil {
 		fmt.Println("Error: ", e)
@@ -366,6 +370,11 @@ func UpdateSpeaker(c *fiber.Ctx)error{
 	errors := validators.ValidateSpeaker(speaker)
 	if errors != nil {
 		return c.Status(fiber.StatusBadGateway).JSON(errors)
+	}
+	if speaker.ID == primitive.NilObjectID {
+		return c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
+			"error": "ObjectID is required",
+		})
 	}
 	speaker.EventSlug = strings.ToLower(speaker.EventSlug)
 
