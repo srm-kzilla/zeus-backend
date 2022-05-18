@@ -13,6 +13,7 @@ import (
 	"github.com/srm-kzilla/events/database"
 	"github.com/srm-kzilla/events/utils/constants"
 	"github.com/srm-kzilla/events/utils/services/mailer"
+	qr "github.com/srm-kzilla/events/utils/services/qrcode"
 	"github.com/srm-kzilla/events/validators"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -96,11 +97,12 @@ func RegisterForEvent(c *fiber.Ctx) error {
 		return err
 	}
 	sesInput := mailer.SESInput{
-		TemplateName:  "newUser.html",
+		TemplateName:  mailer.Template_Names.NewUserTemplate,
 		Subject:       "Registration Successfully",
 		Name:          user.Name,
 		RecieverEmail: user.Email,
 		SenderEmail:   os.Getenv("SENDER_EMAIL"),
+		EmbedData:     nil,
 	}
 	mailer.SendEmail(sesInput)
 	c.Status(fiber.StatusCreated).JSON(user)
@@ -173,11 +175,12 @@ func RsvpForEvent(c *fiber.Ctx) error {
 	event.RSVP_Users = append(event.RSVP_Users, reqBody.Email)
 	eventsCollection.FindOneAndReplace(context.Background(), bson.M{"slug": reqBody.EventSlug}, event)
 	sesInput := mailer.SESInput{
-		TemplateName:  "newUser.html",
+		TemplateName:  mailer.Template_Names.RsvpTemplate,
 		Subject:       "RSVP Successfull | will add QR later :)",
 		Name:          user.Name,
 		RecieverEmail: user.Email,
 		SenderEmail:   os.Getenv("SENDER_EMAIL"),
+		EmbedData: 		bson.M{"QrLink":qr.GenerateQRCode(user.ID.Hex())},
 	}
 	mailer.SendEmail(sesInput)
 	c.Status(fiber.StatusOK).JSON(fiber.Map{
