@@ -170,9 +170,7 @@ func RsvpForEvent(c *fiber.Ctx) error {
 		})
 		return nil
 	}
-	var rsvpUser userModel.RsvpUsers
-	rsvpUser.Email = reqBody.Email
-	event.RSVP_Users = append(event.RSVP_Users, rsvpUser)
+	event.RSVP_Users = append(event.RSVP_Users, reqBody.Email)
 	eventsCollection.FindOneAndReplace(context.Background(), bson.M{"slug": reqBody.EventSlug}, event)
 	sesInput := mailer.SESInput{
 		TemplateName:  "newUser.html",
