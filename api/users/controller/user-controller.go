@@ -25,7 +25,7 @@ func RegisterForEvent(c *fiber.Ctx) error {
 
 	E := validators.ValidateRegisterUserReq(reqBody)
 	if E != nil {
-		c.Status(fiber.StatusBadGateway).JSON(E)
+		c.Status(fiber.StatusBadRequest).JSON(E)
 		return nil
 	}
 
@@ -34,7 +34,7 @@ func RegisterForEvent(c *fiber.Ctx) error {
 
 	errors := validators.ValidateUser((user))
 	if errors != nil {
-		c.Status(fiber.StatusBadGateway).JSON(errors)
+		c.Status(fiber.StatusBadRequest).JSON(errors)
 		return nil
 	}
 	usersCollection, e := database.GetCollection("zeus_Events", "Users")
@@ -56,7 +56,7 @@ func RegisterForEvent(c *fiber.Ctx) error {
 	var event eventModel.Event
 	err := eventsCollection.FindOne(context.Background(), bson.M{"slug": reqBody.EventSlug}).Decode(&event)
 	if err != nil {
-		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
+		c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "No such event/eventSlug exists",
 		})
 		return nil
@@ -70,12 +70,12 @@ func RegisterForEvent(c *fiber.Ctx) error {
 	var check userModel.User
 	usersCollection.FindOne(context.Background(), bson.M{"email": user.Email}).Decode(&check)
 	if check.Email == user.Email {
-		// c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
+		// c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 		// 	"error":   "User with that email already exists",
 		// })
 		// return nil
 		if helpers.ExistsInArray(check.EventSlugs, reqBody.EventSlug) {
-			c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
+			c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"error": "User already registered for this event",
 			})
 			return nil
@@ -119,7 +119,7 @@ func RsvpForEvent(c *fiber.Ctx) error {
 
 	E := validators.ValidateRsvpUserReq(reqBody)
 	if E != nil {
-		c.Status(fiber.StatusBadGateway).JSON(E)
+		c.Status(fiber.StatusBadRequest).JSON(E)
 		return nil
 	}
 
@@ -142,7 +142,7 @@ func RsvpForEvent(c *fiber.Ctx) error {
 	var event eventModel.Event
 	errr := eventsCollection.FindOne(context.Background(), bson.M{"slug": reqBody.EventSlug}).Decode(&event)
 	if errr != nil {
-		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
+		c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "No such event/eventSlug exists",
 		})
 		return nil
@@ -163,14 +163,14 @@ func RsvpForEvent(c *fiber.Ctx) error {
 		return nil
 	}
 	if !helpers.ExistsInArray(user.EventSlugs, reqBody.EventSlug) {
-		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
+		c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "User not registered for this event",
 		})
 		return nil
 	}
 
 	if helpers.ExistsInArray(event.RSVPUsers, reqBody.Email) {
-		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
+		c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "User already RSVPed for this event",
 		})
 		return nil

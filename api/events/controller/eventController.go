@@ -180,13 +180,16 @@ func GetEventUsers(c *fiber.Ctx) error {
 			"users": users,
 		})
 	}
-	if len(users) == 0 {
-		c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"error": "No users found",
-		})
-		return nil
-	}
-	c.Status((fiber.StatusOK)).JSON(users)
+	// if len(users) == 0 {
+	// 	c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+	// 		"error": "No users found",
+	// 	})
+	// 	return nil
+	// }
+	c.Status((fiber.StatusOK)).JSON(fiber.Map{
+		"users": users,
+		"numOfUsers": len(users),
+	})
 
 	return nil
 }
