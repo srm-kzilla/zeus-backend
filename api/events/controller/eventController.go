@@ -31,7 +31,7 @@ func GetAllEvents(c *fiber.Ctx) error {
 		})
 	}
 	lookupStage := bson.D{{"$lookup", bson.D{{"from","Speakers"}, {"localField","slug"}, {"foreignField","slug"},{"as","speakers"}}}}
-	cursor, err := eventsCollection.Aggregate(context.Background(), mongo.Pipeline{lookupStage})
+	cursor, err := eventsCollection.Aggregate(context.Background(), mongo.Pipeline{lookupStage, bson.D{{"$sort",bson.D{{"_id",-1}}}}})
 	if err = cursor.All(context.Background(), &events); err != nil {
 		log.Println("Error ", err)
 		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
