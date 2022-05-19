@@ -12,3 +12,11 @@ type TemplateNames struct {
 	RsvpTemplate	string
 	NewUserTemplate	string
 }
+
+type RsvpEmbed struct {
+	QrLink		string 	`json:"QrLink"`
+}
+
+type NewUserEmbed struct {
+	Name 		string 		`json:"Name"`
+}

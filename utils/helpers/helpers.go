@@ -2,7 +2,7 @@ package helpers
 
 import (
 	"fmt"
-
+	"reflect"
 	gonanoid "github.com/matoous/go-nanoid"
 )
 
@@ -14,4 +14,19 @@ var alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 		return err.Error()
 	}
 	return nanoID
+}
+
+func ExistsInArray(Array interface{}, item interface{}) bool {
+arr := reflect.ValueOf(Array)
+
+if arr.Kind() != reflect.Array {
+	println("Invalid data type")
+}
+for i := 0; i < arr.Len(); i++ {
+	if arr.Index(i).Interface() == item {
+		return true
+	}
+}
+
+return false
 }

@@ -11,7 +11,7 @@ import (
 	eventModel "github.com/srm-kzilla/events/api/events/model"
 	userModel "github.com/srm-kzilla/events/api/users/model"
 	"github.com/srm-kzilla/events/database"
-	"github.com/srm-kzilla/events/utils/constants"
+	"github.com/srm-kzilla/events/utils/helpers"
 	"github.com/srm-kzilla/events/utils/services/mailer"
 	qr "github.com/srm-kzilla/events/utils/services/qrcode"
 	"github.com/srm-kzilla/events/validators"
@@ -74,7 +74,7 @@ func RegisterForEvent(c *fiber.Ctx) error {
 		// 	"error":   "User with that email already exists",
 		// })
 		// return nil
-		if constants.ExistsInArray(check.EventSlugs, reqBody.EventSlug) {
+		if helpers.ExistsInArray(check.EventSlugs, reqBody.EventSlug) {
 			c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
 				"error": "User already registered for this event",
 			})
@@ -96,13 +96,16 @@ func RegisterForEvent(c *fiber.Ctx) error {
 		})
 		return err
 	}
+	newUserEmbed := mailer.NewUserEmbed{
+		Name: user.Name,
+	}
 	sesInput := mailer.SESInput{
-		TemplateName:  mailer.Template_Names.NewUserTemplate,
+		TemplateName:  mailer.TEMPLATES.NewUserTemplate,
 		Subject:       "Registration Successfully",
 		Name:          user.Name,
 		RecieverEmail: user.Email,
 		SenderEmail:   os.Getenv("SENDER_EMAIL"),
-		EmbedData:     nil,
+		EmbedData:     newUserEmbed,
 	}
 	mailer.SendEmail(sesInput)
 	c.Status(fiber.StatusCreated).JSON(user)
@@ -159,28 +162,31 @@ func RsvpForEvent(c *fiber.Ctx) error {
 		})
 		return nil
 	}
-	if !constants.ExistsInArray(user.EventSlugs, reqBody.EventSlug) {
+	if !helpers.ExistsInArray(user.EventSlugs, reqBody.EventSlug) {
 		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
 			"error": "User not registered for this event",
 		})
 		return nil
 	}
 
-	if constants.ExistsInArray(event.RSVP_Users, reqBody.Email) {
+	if helpers.ExistsInArray(event.RSVP_Users, reqBody.Email) {
 		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
 			"error": "User already RSVPed for this event",
 		})
 		return nil
 	}
 	event.RSVP_Users = append(event.RSVP_Users, reqBody.Email)
+	rsvpEmbed := mailer.RsvpEmbed{
+		QrLink: qr.GenerateQRCode(user.ID.Hex()),
+	}
 	eventsCollection.FindOneAndReplace(context.Background(), bson.M{"slug": reqBody.EventSlug}, event)
 	sesInput := mailer.SESInput{
-		TemplateName:  mailer.Template_Names.RsvpTemplate,
+		TemplateName:  mailer.TEMPLATES.RsvpTemplate,
 		Subject:       "RSVP Successfull | will add QR later :)",
 		Name:          user.Name,
 		RecieverEmail: user.Email,
 		SenderEmail:   os.Getenv("SENDER_EMAIL"),
-		EmbedData: 		bson.M{"QrLink":qr.GenerateQRCode(user.ID.Hex())},
+		EmbedData: 	   rsvpEmbed,
 	}
 	mailer.SendEmail(sesInput)
 	c.Status(fiber.StatusOK).JSON(fiber.Map{
