@@ -1,4 +1,4 @@
-package inEventModel
+package InEventModel
 
 import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -6,12 +6,13 @@ import (
 
 type InEventData struct {
 	ID           primitive.ObjectID `json:"_id" bson:"_id"`
-	UserID       string             `validate:"required" json:"userId" bson:"userId"`
+	UserID       primitive.ObjectID `validate:"required" json:"userId" bson:"userId"`
 	EventSlug    string             `validate:"required" json:"eventSlug" bson:"eventSlug"`
 	FoodReceived bool               `validate:"required" json:"foodReceived" bson:"foodReceived"`
 }
 
 type AttendanceQuery struct {
-	Email string `query:"email"`
+	UserID primitive.ObjectID `query:"userId"`
 	Slug  string `query:"slug"`
+	Action string `query:"action"`
 }

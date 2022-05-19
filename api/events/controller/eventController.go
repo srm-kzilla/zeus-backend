@@ -348,7 +348,7 @@ func UpdateEvent(c *fiber.Ctx) error {
 		})
 		return nil
 	}
-	event.RSVP_Users = check.RSVP_Users
+	event.RSVPUsers = check.RSVPUsers
 	errr := eventsCollection.FindOneAndReplace(context.Background(), bson.M{"slug": event.Slug}, event).Decode(&check)
 	if errr != nil {
 		fmt.Println("Error: ", errr)

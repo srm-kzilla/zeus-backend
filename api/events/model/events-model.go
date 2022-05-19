@@ -42,7 +42,7 @@ type Event struct {
 	StartDate   string             		`validate:"required" json:"startDate" bson:"startDate"`
 	EventCover  string 					`validate:"required" json:"eventCover" bson:"eventCover"`
 	IsCompleted bool   					`json:"isCompleted" bson:"isCompleted"`
-	RSVP_Users  []string 	`json:"rsvp_users" bson:"rsvp_users"`
+	RSVPUsers  []string 				`json:"rsvpUsers" bson:"rsvpUsers"`
 }
 
 type EventWithSpeakers struct {

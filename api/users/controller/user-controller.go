@@ -169,13 +169,13 @@ func RsvpForEvent(c *fiber.Ctx) error {
 		return nil
 	}
 
-	if helpers.ExistsInArray(event.RSVP_Users, reqBody.Email) {
+	if helpers.ExistsInArray(event.RSVPUsers, reqBody.Email) {
 		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
 			"error": "User already RSVPed for this event",
 		})
 		return nil
 	}
-	event.RSVP_Users = append(event.RSVP_Users, reqBody.Email)
+	event.RSVPUsers = append(event.RSVPUsers, reqBody.Email)
 	rsvpEmbed := mailer.RsvpEmbed{
 		QrLink: qr.GenerateQRCode(user.ID.Hex()),
 	}
