@@ -22,7 +22,7 @@ func SetupApp(app *fiber.App) {
 	api.Get("/event/:slug", eventController.GetEventBySlug)
 	api.Get("/events", eventController.GetAllEvents)
 	api.Post("/register", userController.RegisterForEvent)
-	api.Post("/rsvp", userController.RsvpForEvent) //TODO POST -> GET
+	api.Get("/rsvp", userController.RsvpForEvent) //TODO POST -> GET
 	protected := api.Use(authController.AuthenticateAdmin)
 	protected.Get("/users", eventController.GetEventUsers)
 	protected.Post("/event", eventController.CreateEvent)
