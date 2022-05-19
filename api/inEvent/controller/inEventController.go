@@ -7,10 +7,11 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	EventModel "github.com/srm-kzilla/events/api/events/model"
-	UserModel  "github.com/srm-kzilla/events/api/users/model"
 	InEventModel "github.com/srm-kzilla/events/api/inEvent/model"
+	UserModel "github.com/srm-kzilla/events/api/users/model"
 	"github.com/srm-kzilla/events/database"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 // func grantAttendance(c *fiber.Ctx, inEventDataCollection *mongo.Collection, userData *userModel.User, slug string) error {
@@ -152,6 +153,14 @@ import (
 // 	}
 // }
 
+func grantAttendance(c *fiber.Ctx, inEventDataCollection *mongo.Collection, userData *UserModel.User, slug string) error {
+	return nil
+}
+
+func handOverFood(c *fiber.Ctx, inEventDataCollection *mongo.Collection, userData *UserModel.User, slug string) error {
+	return nil
+}
+
 func InEventHandler(c *fiber.Ctx)error {
 	attendanceQuery := new(InEventModel.AttendanceQuery)
 	if err := c.QueryParser(attendanceQuery); err != nil {
@@ -203,11 +212,21 @@ func InEventHandler(c *fiber.Ctx)error {
 			"error":   error.Error(),
 		})
 	}
-	er := eventsCollection.FindOne(context.Background(), bson.M{"slug": attendanceQuery.Slug, "rsvpUsers": bson.M{"$in": []string{userData.Email}}}).Decode(&eventData)
+	er := eventsCollection.FindOne(context.Background(), bson.M{"slug": attendanceQuery.Slug, "rsvpUsers": bson.M{"$in": []string{userData.ID.Hex()}}}).Decode(&eventData)
 	if er != nil {
 		fmt.Println("Error", er)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"message": "User not Rsvped for this event",
+		})
+	}
+	switch action := attendanceQuery.Action; action {
+	case "attendance":
+		// run the attendance code
+	case "food":
+		// run the food code
+	default:
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "Invalid action chosen",
 		})
 	}
 return nil

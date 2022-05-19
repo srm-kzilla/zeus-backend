@@ -114,7 +114,7 @@ func RegisterForEvent(c *fiber.Ctx) error {
 
 func RsvpForEvent(c *fiber.Ctx) error {
 	var reqBody userModel.RsvpUserReq
-	c.BodyParser(&reqBody)
+	c.QueryParser(&reqBody)
 	reqBody.EventSlug = strings.ToLower(reqBody.EventSlug)
 
 	E := validators.ValidateRsvpUserReq(reqBody)
@@ -153,7 +153,8 @@ func RsvpForEvent(c *fiber.Ctx) error {
 		})
 	}
 	var user userModel.User
-	err := usersCollection.FindOne(context.Background(), bson.M{"email": reqBody.Email}).Decode(&user)
+	objId, _ := primitive.ObjectIDFromHex(reqBody.UserId)
+	err := usersCollection.FindOne(context.Background(), bson.M{"_id": objId}).Decode(&user)
 	if err != nil {
 		log.Println("Error", err)
 		c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -169,13 +170,13 @@ func RsvpForEvent(c *fiber.Ctx) error {
 		return nil
 	}
 
-	if helpers.ExistsInArray(event.RSVPUsers, reqBody.Email) {
+	if helpers.ExistsInArray(event.RSVPUsers, reqBody.UserId) {
 		c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "User already RSVPed for this event",
 		})
 		return nil
 	}
-	event.RSVPUsers = append(event.RSVPUsers, reqBody.Email)
+	event.RSVPUsers = append(event.RSVPUsers, reqBody.UserId)
 	rsvpEmbed := mailer.RsvpEmbed{
 		QrLink: qr.GenerateQRCode(user.ID.Hex()),
 	}
