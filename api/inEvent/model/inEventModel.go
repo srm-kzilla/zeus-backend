@@ -8,11 +8,11 @@ type InEventData struct {
 	ID           primitive.ObjectID `json:"_id" bson:"_id"`
 	UserID       primitive.ObjectID `validate:"required" json:"userId" bson:"userId"`
 	EventSlug    string             `validate:"required" json:"eventSlug" bson:"eventSlug"`
-	FoodReceived bool               `validate:"required" json:"foodReceived" bson:"foodReceived"`
+	FoodReceived bool               `validate:"required" default:"false" json:"foodReceived" bson:"foodReceived"`
 }
 
 type AttendanceQuery struct {
-	UserID primitive.ObjectID `query:"userId"`
-	Slug  string `query:"slug"`
-	Action string `query:"action"`
+	UserID string `validate:"required" json:"userId" bson:"userId"`
+	Slug  string `validate:"required" json:"eventSlug" bson:"eventSlug"`
+	Action string `validate:"required" json:"action" bson:"action"`
 }

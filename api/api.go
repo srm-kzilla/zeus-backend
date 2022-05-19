@@ -3,7 +3,7 @@ package api
 import (
 	"github.com/gofiber/fiber/v2"
 	eventController "github.com/srm-kzilla/events/api/events/controller"
-	// inEventController "github.com/srm-kzilla/events/api/inEvent/controller"
+	inEventController "github.com/srm-kzilla/events/api/inEvent/controller"
 	userController "github.com/srm-kzilla/events/api/users/controller"
 	authController "github.com/srm-kzilla/events/api/auth/controller"
 )
@@ -22,13 +22,14 @@ func SetupApp(app *fiber.App) {
 	api.Get("/event/:slug", eventController.GetEventBySlug)
 	api.Get("/events", eventController.GetAllEvents)
 	api.Post("/register", userController.RegisterForEvent)
-	api.Get("/rsvp", userController.RsvpForEvent) //TODO POST -> GET
+	api.Get("/rsvp", userController.RsvpForEvent)
 	protected := api.Use(authController.AuthenticateAdmin)
 	protected.Get("/users", eventController.GetEventUsers)
 	protected.Post("/event", eventController.CreateEvent)
 	protected.Put("/event", eventController.UpdateEvent)
 	protected.Post("/event/close", eventController.CloseEvent)
-	// protected.Get("/inEvent/:action", inEventController.InEventHandler)
+	protected.Post("/inevent", inEventController.InEventHandler)
+	protected.Get("/inevent/data", inEventController.GetInEventData)
 	protected.Post("/upload", eventController.UploadEventCover)
 	protected.Post("/event/speaker", eventController.AddSpeaker)
 	protected.Put("/event/speaker", eventController.UpdateSpeaker)
