@@ -3,7 +3,9 @@ package api
 import (
 	"github.com/gofiber/fiber/v2"
 	eventController "github.com/srm-kzilla/events/api/events/controller"
+	inEventController "github.com/srm-kzilla/events/api/inEvent/controller"
 	userController "github.com/srm-kzilla/events/api/users/controller"
+	authController "github.com/srm-kzilla/events/api/auth/controller"
 )
 
 func handleRoot(c *fiber.Ctx) error {
@@ -13,13 +15,22 @@ func handleRoot(c *fiber.Ctx) error {
 func SetupApp(app *fiber.App) {
 	api := app.Group("/api")
 	api.Get("/", handleRoot)
+	api.Post("/admin/register", authController.RegisterAdmin)
+	api.Post("/admin/login", authController.LoginAdmin)
+	api.Post("/admin/refresh", authController.RefreshAdmin)
 	api.Get("/event", eventController.GetEventById)
 	api.Get("/event/:slug", eventController.GetEventBySlug)
 	api.Get("/events", eventController.GetAllEvents)
-	api.Get("/users", eventController.GetEventUsers)
-	api.Post("/event", eventController.CreateEvent)
 	api.Post("/register", userController.RegisterForEvent)
-	api.Post("/rsvp", userController.RsvpForEvent)
-	api.Post("/event/close", eventController.CloseEvent)
-	api.Post("/event/upload/cover", eventController.UploadEventCover)
+	api.Get("/rsvp", userController.RsvpForEvent)
+	protected := api.Use(authController.AuthenticateAdmin)
+	protected.Get("/users", eventController.GetEventUsers)
+	protected.Post("/event", eventController.CreateEvent)
+	protected.Put("/event", eventController.UpdateEvent)
+	protected.Post("/event/close", eventController.CloseEvent)
+	protected.Post("/inevent", inEventController.InEventHandler)
+	protected.Get("/inevent/data", inEventController.GetInEventData)
+	protected.Post("/upload", eventController.UploadEventCover)
+	protected.Post("/event/speaker", eventController.AddSpeaker)
+	protected.Put("/event/speaker", eventController.UpdateSpeaker)
 }

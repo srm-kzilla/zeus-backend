@@ -3,21 +3,26 @@ package eventController
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
 	"log"
+	"os"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
 	eventModel "github.com/srm-kzilla/events/api/events/model"
 	userModel "github.com/srm-kzilla/events/api/users/model"
 	"github.com/srm-kzilla/events/database"
+	helpers "github.com/srm-kzilla/events/utils/helpers"
+	S3 "github.com/srm-kzilla/events/utils/services/s3"
 	"github.com/srm-kzilla/events/validators"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 // Get all Events Route
 func GetAllEvents(c *fiber.Ctx) error {
-	var events []eventModel.Event
+	var events []bson.M
 	eventsCollection, e := database.GetCollection("zeus_Events", "Events")
 	if e != nil {
 		fmt.Println("Error: ", e)
@@ -25,8 +30,8 @@ func GetAllEvents(c *fiber.Ctx) error {
 			"error": e.Error(),
 		})
 	}
-
-	cursor, err := eventsCollection.Find(context.Background(), bson.D{})
+	lookupStage := bson.D{{"$lookup", bson.D{{"from","Speakers"}, {"localField","slug"}, {"foreignField","slug"},{"as","speakers"}}}}
+	cursor, err := eventsCollection.Aggregate(context.Background(), mongo.Pipeline{lookupStage, bson.D{{"$sort",bson.D{{"_id",-1}}}}})
 	if err = cursor.All(context.Background(), &events); err != nil {
 		log.Println("Error ", err)
 		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
@@ -34,13 +39,11 @@ func GetAllEvents(c *fiber.Ctx) error {
 			"events": events,
 		})
 	}
-
 	c.Status(fiber.StatusOK).JSON(events)
 
 	return nil
 }
 
-// FIXME: Some of the data is not passsing in the database
 func CreateEvent(c *fiber.Ctx) error {
 	var event eventModel.Event
 
@@ -88,7 +91,7 @@ func CreateEvent(c *fiber.Ctx) error {
 }
 
 func GetEventById(c *fiber.Ctx) error {
-	var event eventModel.Event
+	var event []bson.M
 	var id = c.Query("id")
 	objId, _ := primitive.ObjectIDFromHex(id)
 	if id == "" {
@@ -105,21 +108,25 @@ func GetEventById(c *fiber.Ctx) error {
 			"error": e.Error(),
 		})
 	}
-	err := eventsCollection.FindOne(context.Background(), bson.M{"_id": objId}).Decode(&event)
-	if err != nil {
+	matchId := bson.D{{"$match", bson.D{{"_id",objId}}}}
+	lookupStage := bson.D{{"$lookup", bson.D{{"from","Speakers"}, {"localField","slug"}, {"foreignField","slug"},{"as","speakers"}}}}
+	cur, err := eventsCollection.Aggregate(context.Background(), mongo.Pipeline{matchId, lookupStage})
+	if cur.All(context.Background(), &event); err != nil {
 		log.Println("Error ", err)
 		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
 			"error": err.Error(),
 		})
 		return nil
 	}
+
 	c.Status(fiber.StatusOK).JSON(event)
 	return nil
 
 }
 
 func GetEventBySlug(c *fiber.Ctx) error {
-	var event eventModel.Event
+	// var event eventModel.Event
+	var event []bson.M
 	var slug = strings.ToLower(c.Params("slug"))
 
 	if slug == "" {
@@ -136,14 +143,18 @@ func GetEventBySlug(c *fiber.Ctx) error {
 			"error": e.Error(),
 		})
 	}
-	err := eventsCollection.FindOne(context.Background(), bson.M{"slug": slug}).Decode(&event)
-	if err != nil {
+	matchSlug := bson.D{{"$match", bson.D{{"slug",slug}}}}
+	lookupStage := bson.D{{"$lookup", bson.D{{"from","Speakers"}, {"localField","slug"}, {"foreignField","slug"},{"as","speakers"}}}}
+	// err := eventsCollection.FindOne(context.Background(), bson.M{"slug": slug}).Decode(&event)
+	cur, err := eventsCollection.Aggregate(context.Background(), mongo.Pipeline{matchSlug, lookupStage})
+	if cur.All(context.Background(), &event); err != nil {
 		log.Println("Error ", err)
 		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
 			"error": err.Error(),
 		})
 		return nil
 	}
+	
 	c.Status(fiber.StatusOK).JSON(event)
 	return nil
 
@@ -169,13 +180,16 @@ func GetEventUsers(c *fiber.Ctx) error {
 			"users": users,
 		})
 	}
-	if len(users) == 0 {
-		c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"error": "No users found",
-		})
-		return nil
-	}
-	c.Status((fiber.StatusOK)).JSON(users)
+	// if len(users) == 0 {
+	// 	c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+	// 		"error": "No users found",
+	// 	})
+	// 	return nil
+	// }
+	c.Status((fiber.StatusOK)).JSON(fiber.Map{
+		"users": users,
+		"numOfUsers": len(users),
+	})
 
 	return nil
 }
@@ -210,17 +224,201 @@ func CloseEvent(c *fiber.Ctx) error {
 }
 
 func UploadEventCover(c *fiber.Ctx) error {
-	file, err := c.FormFile("cover")
+	var slug  = c.Query("slug")
+	if slug == "" {
+		c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Slug is required",
+		})
+		return nil
+	}
+	file, err := c.FormFile("file")
 	if err != nil {
 		c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": err.Error(),
 		})
 		return nil
 	}
-	c.SaveFile(file, fmt.Sprintf("./uploads/%s", file.Filename))
+	fileBody, _ := file.Open()
+	buf, e := ioutil.ReadAll(fileBody)
+		if e != nil {
+		c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+		return nil
+	}
+	
+	
+	file.Filename = fmt.Sprintf("%s/covers/%s.%s", slug, helpers.GenerateNanoID(10), strings.Split(file.Filename, ".")[1])
+	var filePath string = "./"+file.Filename
+	S3.UploadFile(buf, filePath, file.Size)
 	c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
 		"message": "File uploaded successfully",
+		"key": os.Getenv("S3_LINK") + file.Filename,
 	})
 	return nil
+}
+
+func AddSpeaker(c *fiber.Ctx) error {
+	var speaker eventModel.Speaker
+	var check 	eventModel.Speaker
+	c.BodyParser(&speaker)
+
+	errors := validators.ValidateSpeaker(speaker)
+	if errors != nil {
+		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
+			"error": errors,
+		})
+		return nil
+	}
+
+	speaker.EventSlug = strings.ToLower(speaker.EventSlug)
+	eventsCollection, e := database.GetCollection("zeus_Events", "Events")
+	if e != nil {
+		fmt.Println("Error: ", e)
+		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
+			"error": e.Error(),
+		})
+		return nil
+	}
+	var event eventModel.Event
+	err := eventsCollection.FindOne(context.Background(), bson.M{"slug": speaker.EventSlug}).Decode(&event)
+	if err != nil {
+		log.Println("Error ", err)
+		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
+			"error": "no such event/eventSlug exists",
+		})
+		return nil
+	}
+	speakerCollection, e := database.GetCollection("zeus_Events", "Speakers")
+	if e != nil {
+		fmt.Println("Error: ", e)
+		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
+			"error": e.Error(),
+		})
+		return nil
+	}
+	speakerCollection.FindOne(context.Background(), bson.M{"email":speaker.Email}).Decode(&check)
+	if check.Email == speaker.Email {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Speaker with this email already exists",
+		})
+	}
+	speaker.ID = primitive.NewObjectID()
+	res, err := speakerCollection.InsertOne(context.Background(), speaker)
+	if err != nil {
+		log.Println("Error ", err)
+		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
+			"error": err.Error(),
+			"InsertedId": res.InsertedID,
+		})
+		return nil
+	}
+
+	c.Status(fiber.StatusOK).JSON(speaker)
+
+	return nil
+}
+
+func UpdateEvent(c *fiber.Ctx) error {
+	var event eventModel.Event
+	var check eventModel.Event
+	c.BodyParser(&event)
+
+	errors := validators.ValidateEvents(event)
+	if errors != nil {
+		c.Status(fiber.StatusBadGateway).JSON(errors)
+		return nil
+	}
+	if event.ID == primitive.NilObjectID {
+		return c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
+			"error": "ObjectID is required",
+		})
+	}
+	eventsCollection, e := database.GetCollection("zeus_Events", "Events")
+	if e != nil {
+		fmt.Println("Error: ", e)
+		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
+			"error": e.Error(),
+		})
+	}
+	event.Slug = strings.ToLower(event.Slug)
+	err := eventsCollection.FindOne(context.Background(), bson.M{"slug": event.Slug}).Decode(&check)
+	if err != nil {
+		log.Println("Error ", err)
+		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
+			"error": "no such event/eventSlug exists",
+		})
+		return nil
+	}
+	event.RSVPUsers = check.RSVPUsers
+	errr := eventsCollection.FindOneAndReplace(context.Background(), bson.M{"slug": event.Slug}, event).Decode(&check)
+	if errr != nil {
+		fmt.Println("Error: ", errr)
+		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
+			"error": errr.Error(),
+		})
+		return nil
+	}
+	c.Status(fiber.StatusOK).JSON(event)
+	return nil
+}
+
+func UpdateSpeaker(c *fiber.Ctx)error{
+	var speaker eventModel.Speaker
+	var check eventModel.Speaker
+
+	c.BodyParser(&speaker)
+
+	errors := validators.ValidateSpeaker(speaker)
+	if errors != nil {
+		return c.Status(fiber.StatusBadGateway).JSON(errors)
+	}
+	if speaker.ID == primitive.NilObjectID {
+		return c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
+			"error": "ObjectID is required",
+		})
+	}
+	speaker.EventSlug = strings.ToLower(speaker.EventSlug)
+
+	speakerCollection, e := database.GetCollection("zeus_Events", "Speakers")
+	if e != nil {
+		fmt.Println("Error: ", e)
+		return c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
+			"error": e.Error(),
+		})
+	}
+	eventsCollection, e := database.GetCollection("zeus_Events", "Events")
+	if e != nil {
+		fmt.Println("Error: ", e)
+		return c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
+			"error": e.Error(),
+		})
+	}
+	var event eventModel.Event
+	err := eventsCollection.FindOne(context.Background(), bson.M{"slug": speaker.EventSlug}).Decode(&event)
+	if err != nil {
+		log.Println("Error ", err)
+		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
+			"error": "no such event/eventSlug exists",
+		})
+		return nil
+	}
+	errr := speakerCollection.FindOne(context.Background(), bson.M{"email":speaker.Email}).Decode(&check)
+	if errr != nil {
+		log.Println("Error ", errr)
+		return c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
+			"error": "no such speaker exists",
+		})
+	}
+	errrr := speakerCollection.FindOneAndReplace(context.Background(), bson.M{"email":speaker.Email}, speaker).Decode(&check)
+	if errrr != nil {
+		fmt.Println("Error: ", errrr)
+		return c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
+			"error": errr.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(speaker)
+
 }

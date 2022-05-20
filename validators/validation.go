@@ -2,7 +2,9 @@ package validators
 
 import (
 	"github.com/go-playground/validator/v10"
+	authModel "github.com/srm-kzilla/events/api/auth/model"
 	eventModel "github.com/srm-kzilla/events/api/events/model"
+	inEventModel "github.com/srm-kzilla/events/api/inEvent/model"
 	userModel "github.com/srm-kzilla/events/api/users/model"
 )
 
@@ -80,6 +82,38 @@ func ValidateRegisterUserReq(reqBody userModel.RegisterUserReq) []*ErrorResponse
 }
 
 func ValidateRsvpUserReq(reqBody userModel.RsvpUserReq) []*ErrorResponse {
+	var errors []*ErrorResponse
+	validate := validator.New()
+	err := validate.Struct(reqBody)
+	if err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			var element ErrorResponse
+			element.FailedField = err.StructNamespace()
+			element.Tag = err.Tag()
+			element.Value = err.Param()
+			errors = append(errors, &element)
+		}
+	}
+	return errors
+}
+
+func ValidateAdminUser(reqBody authModel.User) []*ErrorResponse {
+	var errors []*ErrorResponse
+	validate := validator.New()
+	err := validate.Struct(reqBody)
+	if err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			var element ErrorResponse
+			element.FailedField = err.StructNamespace()
+			element.Tag = err.Tag()
+			element.Value = err.Param()
+			errors = append(errors, &element)
+		}
+	}
+	return errors
+}
+
+func ValidateAttendanceQuery(reqBody inEventModel.AttendanceQuery) []*ErrorResponse {
 	var errors []*ErrorResponse
 	validate := validator.New()
 	err := validate.Struct(reqBody)

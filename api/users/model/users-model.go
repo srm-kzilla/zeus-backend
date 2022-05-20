@@ -22,7 +22,7 @@ type User struct {
 }
 
 type RsvpUsers struct {
-	Email        string `json:"email" bson:"email"`
+	UserId       string `json:"userId" bson:"userId"`
 	FoodReceived bool   `json:"foodReceived" bson:"foodReceived"`
 	CheckedIn    bool   `json:"checkedIn" bson:"checkedIn"`
 }
@@ -33,6 +33,6 @@ type RegisterUserReq struct {
 }
 
 type RsvpUserReq struct {
-	Email     string `validate:"required" json:"email" bson:"email"`
+	UserId    string `validate:"required" json:"userId" bson:"userId"`
 	EventSlug string `validate:"required" json:"eventSlug" bson:"eventSlug"`
 }
