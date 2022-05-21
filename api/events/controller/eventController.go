@@ -18,6 +18,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 // Get all Events Route
@@ -62,6 +63,10 @@ func CreateEvent(c *fiber.Ctx) error {
 			"error": e.Error(),
 		})
 	}
+	eventsCollection.Indexes().CreateOne(context.Background(), mongo.IndexModel{
+		Keys: bson.M{"slug":1},
+		Options: options.Index().SetUnique(true),
+	})
 
 
 	event.Slug = strings.ToLower(event.Slug)
