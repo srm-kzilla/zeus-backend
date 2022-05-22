@@ -25,6 +25,7 @@ func SetupApp(app *fiber.App) {
 	api.Get("/rsvp", userController.RsvpForEvent)
 	protected := api.Use(authController.AuthenticateAdmin)
 	protected.Get("/users", eventController.GetEventUsers)
+	protected.Get("/user/:userId", userController.GetUserById)
 	protected.Post("/event", eventController.CreateEvent)
 	protected.Put("/event", eventController.UpdateEvent)
 	protected.Post("/event/close", eventController.CloseEvent)

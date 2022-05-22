@@ -17,6 +17,8 @@ import (
 	"github.com/srm-kzilla/events/validators"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func RegisterForEvent(c *fiber.Ctx) error {
@@ -45,6 +47,12 @@ func RegisterForEvent(c *fiber.Ctx) error {
 			"message": "Collection Not found",
 		})
 	}
+
+	usersCollection.Indexes().CreateOne(context.Background(), mongo.IndexModel{
+		Keys: bson.M{"email":1, "phoneNumber":1},
+		Options: options.Index().SetUnique(true),
+	})
+
 	eventsCollection, e := database.GetCollection("zeus_Events", "Events")
 	if e != nil {
 		fmt.Println("Error: ", e)
@@ -195,4 +203,32 @@ func RsvpForEvent(c *fiber.Ctx) error {
 		"Message": "User RSVPed for event",
 	})
 	return nil
+}
+
+func GetUserById(c *fiber.Ctx) error {
+	userId := c.Params("userId")
+	if userId == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "UserId is required",
+		})
+	}
+	objId, _ := primitive.ObjectIDFromHex(userId)
+	usersCollection, e := database.GetCollection("zeus_Events", "Users")
+	if e != nil {
+		fmt.Println("Error: ", e)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error":   e.Error(),
+			"message": "Error getting user collection",
+		})
+	}
+	var user userModel.User
+	err := usersCollection.FindOne(context.Background(), bson.M{"_id": objId}).Decode(&user)
+	if err != nil {
+		log.Println("Error", err)
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error":   err.Error(),
+			"message": "User not found",
+		})
+	}
+	return c.Status(fiber.StatusOK).JSON(user)
 }
