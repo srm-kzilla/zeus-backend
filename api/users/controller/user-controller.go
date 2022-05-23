@@ -49,7 +49,7 @@ func RegisterForEvent(c *fiber.Ctx) error {
 	}
 
 	usersCollection.Indexes().CreateOne(context.Background(), mongo.IndexModel{
-		Keys: bson.M{"email":1, "phoneNumber":1},
+		Keys:    bson.M{"email": 1, "phoneNumber": 1},
 		Options: options.Index().SetUnique(true),
 	})
 
@@ -76,8 +76,14 @@ func RegisterForEvent(c *fiber.Ctx) error {
 		return nil
 	}
 	var check userModel.User
-	usersCollection.FindOne(context.Background(), bson.M{"email": user.Email}).Decode(&check)
-	if check.Email == user.Email {
+	usersCollection.FindOne(context.Background(), bson.M{
+		"$or": []bson.M{
+			bson.M{"email": user.Email},
+			bson.M{"phoneNumber": user.PhoneNumber},
+			bson.M{"regNumber": user.RegNumber},
+		},
+	}).Decode(&check)
+	if check.Email == user.Email || check.PhoneNumber == user.PhoneNumber || check.RegNumber == user.RegNumber && check.RegNumber != "" {
 		// c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 		// 	"error":   "User with that email already exists",
 		// })
@@ -195,7 +201,7 @@ func RsvpForEvent(c *fiber.Ctx) error {
 		Name:          user.Name,
 		RecieverEmail: user.Email,
 		SenderEmail:   os.Getenv("SENDER_EMAIL"),
-		EmbedData: 	   rsvpEmbed,
+		EmbedData:     rsvpEmbed,
 	}
 	mailer.SendEmail(sesInput)
 	c.Status(fiber.StatusOK).JSON(fiber.Map{
