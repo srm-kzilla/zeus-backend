@@ -18,6 +18,7 @@ type User struct {
 	Name        string             `validate:"required" json:"name" bson:"name"`
 	Email       string             `validate:"required,email" json:"email" bson:"email"`
 	PhoneNumber int                `validate:"required,min=1000000000,max=9999999999" json:"phoneNumber" bson:"phoneNumber"`
+	RegNumber   string             `json:"regNumber" bson:"regNumber"`
 	EventSlugs  []string           `json:"events" bson:"events"`
 }
 
