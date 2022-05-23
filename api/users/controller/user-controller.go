@@ -83,7 +83,7 @@ func RegisterForEvent(c *fiber.Ctx) error {
 			bson.M{"regNumber": user.RegNumber},
 		},
 	}).Decode(&check)
-	if check.Email == user.Email || check.PhoneNumber == user.PhoneNumber || check.RegNumber == user.RegNumber && check.RegNumber != "" {
+	if check.Email == user.Email || check.PhoneNumber == user.PhoneNumber || check.RegNumber == user.RegNumber {
 		// c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 		// 	"error":   "User with that email already exists",
 		// })
