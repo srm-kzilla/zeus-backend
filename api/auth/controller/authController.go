@@ -3,6 +3,7 @@ package authController
 import (
 	"context"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -25,7 +26,7 @@ func RegisterAdmin(c *fiber.Ctx) error {
 	}
 
 	var check authModel.User
-	adminCollection, err := database.GetCollection("zeus_Events", "Admin")
+	adminCollection, err := database.GetCollection(os.Getenv("DB_NAME"), "Admin")
 	if err != nil {
 		return c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
 			"error": err.Error(),
@@ -62,7 +63,7 @@ func LoginAdmin(c *fiber.Ctx)error {
 	var user authModel.User
 	c.BodyParser(&user)
 
-	adminCollection, err := database.GetCollection("zeus_Events", "Admin")
+	adminCollection, err := database.GetCollection(os.Getenv("DB_NAME"), "Admin")
 	if err != nil {
 		return c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
 			"error": err.Error(),
@@ -121,7 +122,7 @@ func RefreshAdmin(c *fiber.Ctx)error {
 	claims := token.Claims.(*jwt.StandardClaims)
 	var email string = claims.Issuer
 
-	adminCollection, err := database.GetCollection("zeus_Events", "Admin")
+	adminCollection, err := database.GetCollection(os.Getenv("DB_NAME"), "Admin")
 	if err != nil {
 		return c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
 			"error": err.Error(),
@@ -167,7 +168,7 @@ func AuthenticateAdmin(c *fiber.Ctx)error {
 	claims := token.Claims.(*jwt.StandardClaims)
 	var email string = claims.Issuer
 
-	adminCollection, err := database.GetCollection("zeus_Events", "Admin")
+	adminCollection, err := database.GetCollection(os.Getenv("DB_NAME"), "Admin")
 	if err != nil {
 		return c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
 			"error": err.Error(),

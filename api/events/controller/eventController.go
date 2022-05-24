@@ -24,7 +24,7 @@ import (
 // Get all Events Route
 func GetAllEvents(c *fiber.Ctx) error {
 	var events []bson.M
-	eventsCollection, e := database.GetCollection("zeus_Events", "Events")
+	eventsCollection, e := database.GetCollection(os.Getenv("DB_NAME"), "Events")
 	if e != nil {
 		fmt.Println("Error: ", e)
 		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
@@ -56,7 +56,7 @@ func CreateEvent(c *fiber.Ctx) error {
 		return nil
 	}
 
-	eventsCollection, e := database.GetCollection("zeus_Events", "Events")
+	eventsCollection, e := database.GetCollection(os.Getenv("DB_NAME"), "Events")
 	if e != nil {
 		fmt.Println("Error: ", e)
 		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
@@ -106,7 +106,7 @@ func GetEventById(c *fiber.Ctx) error {
 		return nil
 	}
 
-	eventsCollection, e := database.GetCollection("zeus_Events", "Events")
+	eventsCollection, e := database.GetCollection(os.Getenv("DB_NAME"), "Events")
 	if e != nil {
 		fmt.Println("Error: ", e)
 		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
@@ -141,7 +141,7 @@ func GetEventBySlug(c *fiber.Ctx) error {
 		return nil
 	}
 
-	eventsCollection, e := database.GetCollection("zeus_Events", "Events")
+	eventsCollection, e := database.GetCollection(os.Getenv("DB_NAME"), "Events")
 	if e != nil {
 		fmt.Println("Error: ", e)
 		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
@@ -159,17 +159,15 @@ func GetEventBySlug(c *fiber.Ctx) error {
 		})
 		return nil
 	}
-	
 	c.Status(fiber.StatusOK).JSON(event)
 	return nil
 
 }
-
 func GetEventUsers(c *fiber.Ctx) error {
 	var users []userModel.User
 	var slug = strings.ToLower(c.Query("slug"))
 
-	usersCollection, e := database.GetCollection("zeus_Events", "Users")
+	usersCollection, e := database.GetCollection(os.Getenv("DB_NAME"), "Users")
 	if e != nil {
 		fmt.Println("Error: ", e)
 		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
@@ -202,7 +200,7 @@ func GetEventUsers(c *fiber.Ctx) error {
 func CloseEvent(c *fiber.Ctx) error {
 	var event eventModel.Event
 	var slug = strings.ToLower(c.Query("slug"))
-	eventsCollection, e := database.GetCollection("zeus_Events", "Events")
+	eventsCollection, e := database.GetCollection(os.Getenv("DB_NAME"), "Events")
 	if e != nil {
 		fmt.Println("Error: ", e)
 		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
@@ -278,7 +276,7 @@ func AddSpeaker(c *fiber.Ctx) error {
 	}
 
 	speaker.EventSlug = strings.ToLower(speaker.EventSlug)
-	eventsCollection, e := database.GetCollection("zeus_Events", "Events")
+	eventsCollection, e := database.GetCollection(os.Getenv("DB_NAME"), "Events")
 	if e != nil {
 		fmt.Println("Error: ", e)
 		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
@@ -295,7 +293,7 @@ func AddSpeaker(c *fiber.Ctx) error {
 		})
 		return nil
 	}
-	speakerCollection, e := database.GetCollection("zeus_Events", "Speakers")
+	speakerCollection, e := database.GetCollection(os.Getenv("DB_NAME"), "Speakers")
 	if e != nil {
 		fmt.Println("Error: ", e)
 		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
@@ -340,7 +338,7 @@ func UpdateEvent(c *fiber.Ctx) error {
 			"error": "ObjectID is required",
 		})
 	}
-	eventsCollection, e := database.GetCollection("zeus_Events", "Events")
+	eventsCollection, e := database.GetCollection(os.Getenv("DB_NAME"), "Events")
 	if e != nil {
 		fmt.Println("Error: ", e)
 		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
@@ -386,14 +384,14 @@ func UpdateSpeaker(c *fiber.Ctx)error{
 	}
 	speaker.EventSlug = strings.ToLower(speaker.EventSlug)
 
-	speakerCollection, e := database.GetCollection("zeus_Events", "Speakers")
+	speakerCollection, e := database.GetCollection(os.Getenv("DB_NAME"), "Speakers")
 	if e != nil {
 		fmt.Println("Error: ", e)
 		return c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
 			"error": e.Error(),
 		})
 	}
-	eventsCollection, e := database.GetCollection("zeus_Events", "Events")
+	eventsCollection, e := database.GetCollection(os.Getenv("DB_NAME"), "Events")
 	if e != nil {
 		fmt.Println("Error: ", e)
 		return c.Status(fiber.StatusBadGateway).JSON(fiber.Map{

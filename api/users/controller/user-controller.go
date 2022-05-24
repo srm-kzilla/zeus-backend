@@ -39,7 +39,7 @@ func RegisterForEvent(c *fiber.Ctx) error {
 		c.Status(fiber.StatusBadRequest).JSON(errors)
 		return nil
 	}
-	usersCollection, e := database.GetCollection("zeus_Events", "Users")
+	usersCollection, e := database.GetCollection(os.Getenv("DB_NAME"), "Users")
 	if e != nil {
 		fmt.Println("Error: ", e)
 		c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -53,7 +53,7 @@ func RegisterForEvent(c *fiber.Ctx) error {
 		Options: options.Index().SetUnique(true),
 	})
 
-	eventsCollection, e := database.GetCollection("zeus_Events", "Events")
+	eventsCollection, e := database.GetCollection(os.Getenv("DB_NAME"), "Events")
 	if e != nil {
 		fmt.Println("Error: ", e)
 		c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -109,7 +109,7 @@ func RegisterForEvent(c *fiber.Ctx) error {
 	}
 	sesInput := mailer.SESInput{
 		TemplateName:  mailer.TEMPLATES.NewUserTemplate,
-		Subject:       "Registration Successfully",
+		Subject:       "Registration Successfull",
 		Name:          user.Name,
 		RecieverEmail: user.Email,
 		SenderEmail:   os.Getenv("SENDER_EMAIL"),
@@ -131,7 +131,7 @@ func RsvpForEvent(c *fiber.Ctx) error {
 		return nil
 	}
 
-	usersCollection, e := database.GetCollection("zeus_Events", "Users")
+	usersCollection, e := database.GetCollection(os.Getenv("DB_NAME"), "Users")
 	if e != nil {
 		fmt.Println("Error: ", e)
 		c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -139,7 +139,7 @@ func RsvpForEvent(c *fiber.Ctx) error {
 			"message": "Collection Not found",
 		})
 	}
-	eventsCollection, e := database.GetCollection("zeus_Events", "Events")
+	eventsCollection, e := database.GetCollection(os.Getenv("DB_NAME"), "Events")
 	if e != nil {
 		fmt.Println("Error: ", e)
 		c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -191,7 +191,7 @@ func RsvpForEvent(c *fiber.Ctx) error {
 	eventsCollection.FindOneAndReplace(context.Background(), bson.M{"slug": reqBody.EventSlug}, event)
 	sesInput := mailer.SESInput{
 		TemplateName:  mailer.TEMPLATES.RsvpTemplate,
-		Subject:       "RSVP Successfull | will add QR later :)",
+		Subject:       "RSVP Successfull",
 		Name:          user.Name,
 		RecieverEmail: user.Email,
 		SenderEmail:   os.Getenv("SENDER_EMAIL"),
@@ -213,7 +213,7 @@ func GetUserById(c *fiber.Ctx) error {
 		})
 	}
 	objId, _ := primitive.ObjectIDFromHex(userId)
-	usersCollection, e := database.GetCollection("zeus_Events", "Users")
+	usersCollection, e := database.GetCollection(os.Getenv("DB_NAME"), "Users")
 	if e != nil {
 		fmt.Println("Error: ", e)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{

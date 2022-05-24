@@ -3,6 +3,7 @@ package InEventController
 import (
 	"context"
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
@@ -139,7 +140,7 @@ func InEventHandler(c *fiber.Ctx)error {
 	}
 
 	attendanceQuery.Slug = strings.ToLower(attendanceQuery.Slug)
-	eventsCollection, err := database.GetCollection("zeus_Events", "Events")
+	eventsCollection, err := database.GetCollection(os.Getenv("DB_NAME"), "Events")
 	if err != nil {
 		fmt.Println("Error", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -147,7 +148,7 @@ func InEventHandler(c *fiber.Ctx)error {
 			"error":   err.Error(),
 		})
 	}
-	userCollection, err := database.GetCollection("zeus_Events", "Users")
+	userCollection, err := database.GetCollection(os.Getenv("DB_NAME"), "Users")
 	if err != nil {
 		fmt.Println("Error", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -155,7 +156,7 @@ func InEventHandler(c *fiber.Ctx)error {
 			"error":   err.Error(),
 		})
 	}
-	inEventsCollection, err := database.GetCollection("zeus_Events", "InEvents")
+	inEventsCollection, err := database.GetCollection(os.Getenv("DB_NAME"), "InEvents")
 	if err != nil {
 		fmt.Println("Error", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -212,7 +213,7 @@ func GetInEventData (c *fiber.Ctx)error{
 		})
 	}
 	var eventData []InEventModel.InEventData
-	inEventDataCollection, err := database.GetCollection("zeus_Events", "InEvents")
+	inEventDataCollection, err := database.GetCollection(os.Getenv("DB_NAME"), "InEvents")
 	if err != nil {
 		fmt.Println("Error", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
