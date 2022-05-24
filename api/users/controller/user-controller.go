@@ -78,9 +78,9 @@ func RegisterForEvent(c *fiber.Ctx) error {
 	var check userModel.User
 	usersCollection.FindOne(context.Background(), bson.M{
 		"$or": []bson.M{
-			bson.M{"email": user.Email},
-			bson.M{"phoneNumber": user.PhoneNumber},
-			bson.M{"regNumber": user.RegNumber},
+			{"email": user.Email},
+			{"phoneNumber": user.PhoneNumber},
+			{"regNumber": user.RegNumber},
 		},
 	}).Decode(&check)
 	if check.Email == user.Email || check.PhoneNumber == user.PhoneNumber || check.RegNumber == user.RegNumber {
