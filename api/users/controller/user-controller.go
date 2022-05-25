@@ -11,11 +11,14 @@ import (
 	eventModel "github.com/srm-kzilla/events/api/events/model"
 	userModel "github.com/srm-kzilla/events/api/users/model"
 	"github.com/srm-kzilla/events/database"
-	"github.com/srm-kzilla/events/utils/constants"
+	"github.com/srm-kzilla/events/utils/helpers"
 	"github.com/srm-kzilla/events/utils/services/mailer"
+	qr "github.com/srm-kzilla/events/utils/services/qrcode"
 	"github.com/srm-kzilla/events/validators"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func RegisterForEvent(c *fiber.Ctx) error {
@@ -24,7 +27,7 @@ func RegisterForEvent(c *fiber.Ctx) error {
 
 	E := validators.ValidateRegisterUserReq(reqBody)
 	if E != nil {
-		c.Status(fiber.StatusBadGateway).JSON(E)
+		c.Status(fiber.StatusBadRequest).JSON(E)
 		return nil
 	}
 
@@ -33,10 +36,10 @@ func RegisterForEvent(c *fiber.Ctx) error {
 
 	errors := validators.ValidateUser((user))
 	if errors != nil {
-		c.Status(fiber.StatusBadGateway).JSON(errors)
+		c.Status(fiber.StatusBadRequest).JSON(errors)
 		return nil
 	}
-	usersCollection, e := database.GetCollection("zeus_Events", "Users")
+	usersCollection, e := database.GetCollection(os.Getenv("DB_NAME"), "Users")
 	if e != nil {
 		fmt.Println("Error: ", e)
 		c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -44,7 +47,13 @@ func RegisterForEvent(c *fiber.Ctx) error {
 			"message": "Collection Not found",
 		})
 	}
-	eventsCollection, e := database.GetCollection("zeus_Events", "Events")
+
+	usersCollection.Indexes().CreateOne(context.Background(), mongo.IndexModel{
+		Keys:    bson.M{"email": 1, "phoneNumber": 1},
+		Options: options.Index().SetUnique(true),
+	})
+
+	eventsCollection, e := database.GetCollection(os.Getenv("DB_NAME"), "Events")
 	if e != nil {
 		fmt.Println("Error: ", e)
 		c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -55,7 +64,7 @@ func RegisterForEvent(c *fiber.Ctx) error {
 	var event eventModel.Event
 	err := eventsCollection.FindOne(context.Background(), bson.M{"slug": reqBody.EventSlug}).Decode(&event)
 	if err != nil {
-		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
+		c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "No such event/eventSlug exists",
 		})
 		return nil
@@ -67,14 +76,20 @@ func RegisterForEvent(c *fiber.Ctx) error {
 		return nil
 	}
 	var check userModel.User
-	usersCollection.FindOne(context.Background(), bson.M{"email": user.Email}).Decode(&check)
-	if check.Email == user.Email {
-		// c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
+	usersCollection.FindOne(context.Background(), bson.M{
+		"$or": []bson.M{
+			{"email": user.Email},
+			{"phoneNumber": user.PhoneNumber},
+			{"regNumber": user.RegNumber},
+		},
+	}).Decode(&check)
+	if check.Email == user.Email || check.PhoneNumber == user.PhoneNumber || check.RegNumber == user.RegNumber {
+		// c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 		// 	"error":   "User with that email already exists",
 		// })
 		// return nil
-		if constants.ExistsInArray(check.EventSlugs, reqBody.EventSlug) {
-			c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
+		if helpers.ExistsInArray(check.EventSlugs, reqBody.EventSlug) {
+			c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"error": "User already registered for this event",
 			})
 			return nil
@@ -95,12 +110,16 @@ func RegisterForEvent(c *fiber.Ctx) error {
 		})
 		return err
 	}
+	newUserEmbed := mailer.NewUserEmbed{
+		Name: user.Name,
+	}
 	sesInput := mailer.SESInput{
-		TemplateName:  "newUser.html",
-		Subject:       "Registration Successfully",
+		TemplateName:  mailer.TEMPLATES.NewUserTemplate,
+		Subject:       "Registration Successfull",
 		Name:          user.Name,
 		RecieverEmail: user.Email,
 		SenderEmail:   os.Getenv("SENDER_EMAIL"),
+		EmbedData:     newUserEmbed,
 	}
 	mailer.SendEmail(sesInput)
 	c.Status(fiber.StatusCreated).JSON(user)
@@ -109,16 +128,16 @@ func RegisterForEvent(c *fiber.Ctx) error {
 
 func RsvpForEvent(c *fiber.Ctx) error {
 	var reqBody userModel.RsvpUserReq
-	c.BodyParser(&reqBody)
+	c.QueryParser(&reqBody)
 	reqBody.EventSlug = strings.ToLower(reqBody.EventSlug)
 
 	E := validators.ValidateRsvpUserReq(reqBody)
 	if E != nil {
-		c.Status(fiber.StatusBadGateway).JSON(E)
+		c.Status(fiber.StatusBadRequest).JSON(E)
 		return nil
 	}
 
-	usersCollection, e := database.GetCollection("zeus_Events", "Users")
+	usersCollection, e := database.GetCollection(os.Getenv("DB_NAME"), "Users")
 	if e != nil {
 		fmt.Println("Error: ", e)
 		c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -126,7 +145,7 @@ func RsvpForEvent(c *fiber.Ctx) error {
 			"message": "Collection Not found",
 		})
 	}
-	eventsCollection, e := database.GetCollection("zeus_Events", "Events")
+	eventsCollection, e := database.GetCollection(os.Getenv("DB_NAME"), "Events")
 	if e != nil {
 		fmt.Println("Error: ", e)
 		c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -137,7 +156,7 @@ func RsvpForEvent(c *fiber.Ctx) error {
 	var event eventModel.Event
 	errr := eventsCollection.FindOne(context.Background(), bson.M{"slug": reqBody.EventSlug}).Decode(&event)
 	if errr != nil {
-		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
+		c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "No such event/eventSlug exists",
 		})
 		return nil
@@ -148,7 +167,8 @@ func RsvpForEvent(c *fiber.Ctx) error {
 		})
 	}
 	var user userModel.User
-	err := usersCollection.FindOne(context.Background(), bson.M{"email": reqBody.Email}).Decode(&user)
+	objId, _ := primitive.ObjectIDFromHex(reqBody.UserId)
+	err := usersCollection.FindOne(context.Background(), bson.M{"_id": objId}).Decode(&user)
 	if err != nil {
 		log.Println("Error", err)
 		c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -157,29 +177,31 @@ func RsvpForEvent(c *fiber.Ctx) error {
 		})
 		return nil
 	}
-	if !constants.ExistsInArray(user.EventSlugs, reqBody.EventSlug) {
-		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
+	if !helpers.ExistsInArray(user.EventSlugs, reqBody.EventSlug) {
+		c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "User not registered for this event",
 		})
 		return nil
 	}
 
-	if constants.ExistsInArray(event.RSVP_Users, reqBody.Email) {
-		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
+	if helpers.ExistsInArray(event.RSVPUsers, reqBody.UserId) {
+		c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "User already RSVPed for this event",
 		})
 		return nil
 	}
-	var rsvpUser userModel.RsvpUsers
-	rsvpUser.Email = reqBody.Email
-	event.RSVP_Users = append(event.RSVP_Users, rsvpUser)
+	event.RSVPUsers = append(event.RSVPUsers, reqBody.UserId)
+	rsvpEmbed := mailer.RsvpEmbed{
+		QrLink: qr.GenerateQRCode(user.ID.Hex()),
+	}
 	eventsCollection.FindOneAndReplace(context.Background(), bson.M{"slug": reqBody.EventSlug}, event)
 	sesInput := mailer.SESInput{
-		TemplateName:  "newUser.html",
-		Subject:       "RSVP Successfull | will add QR later :)",
+		TemplateName:  mailer.TEMPLATES.RsvpTemplate,
+		Subject:       "RSVP Successfull",
 		Name:          user.Name,
 		RecieverEmail: user.Email,
 		SenderEmail:   os.Getenv("SENDER_EMAIL"),
+		EmbedData:     rsvpEmbed,
 	}
 	mailer.SendEmail(sesInput)
 	c.Status(fiber.StatusOK).JSON(fiber.Map{
@@ -187,4 +209,32 @@ func RsvpForEvent(c *fiber.Ctx) error {
 		"Message": "User RSVPed for event",
 	})
 	return nil
+}
+
+func GetUserById(c *fiber.Ctx) error {
+	userId := c.Params("userId")
+	if userId == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "UserId is required",
+		})
+	}
+	objId, _ := primitive.ObjectIDFromHex(userId)
+	usersCollection, e := database.GetCollection(os.Getenv("DB_NAME"), "Users")
+	if e != nil {
+		fmt.Println("Error: ", e)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error":   e.Error(),
+			"message": "Error getting user collection",
+		})
+	}
+	var user userModel.User
+	err := usersCollection.FindOne(context.Background(), bson.M{"_id": objId}).Decode(&user)
+	if err != nil {
+		log.Println("Error", err)
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error":   err.Error(),
+			"message": "User not found",
+		})
+	}
+	return c.Status(fiber.StatusOK).JSON(user)
 }
