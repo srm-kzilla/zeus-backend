@@ -190,6 +190,12 @@ func RsvpForEvent(c *fiber.Ctx) error {
 		})
 		return nil
 	}
+	if len(event.RSVPUsers) >= event.MaxRsvp{
+		c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "RSVP limit exceded",
+		})
+		return nil
+	}
 	event.RSVPUsers = append(event.RSVPUsers, reqBody.UserId)
 	rsvpEmbed := mailer.RsvpEmbed{
 		QrLink: qr.GenerateQRCode(user.ID.Hex()),

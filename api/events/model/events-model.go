@@ -43,6 +43,7 @@ type Event struct {
 	EventCover  string 					`validate:"required" json:"eventCover" bson:"eventCover"`
 	IsCompleted bool   					`json:"isCompleted" bson:"isCompleted"`
 	RSVPUsers  []string 				`json:"rsvpUsers" bson:"rsvpUsers"`
+	MaxRsvp 	int 					`validate:"required" json:"maxRsvp" bson:"maxRsvp"`
 }
 
 type EventWithSpeakers struct {
