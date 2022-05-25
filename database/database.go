@@ -11,6 +11,8 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
+var DB *mongo.Client
+
 //GetConnection for connecting to DB
 func GetConnection() (*mongo.Client, error) {
 	if os.Getenv("APP_ENV") != "production" {
@@ -25,17 +27,19 @@ func GetConnection() (*mongo.Client, error) {
 	if uri == "" {
 		log.Println("Mongo URI Required")
 	}
-
-	db, err := mongo.Connect(context.Background(), options.Client().ApplyURI(uri))
+	var err error
+	if DB == nil {
+		DB, err = mongo.Connect(context.Background(), options.Client().ApplyURI(uri))
+	}
 
 	if err != nil {
 		panic("Error while connecting with DB." + err.Error())
 	}
-	err = db.Ping(context.Background(), readpref.Primary())
+	err = DB.Ping(context.Background(), readpref.Primary())
 	if err != nil {
 		panic("Error while connecting with DB." + err.Error())
 	}
-	return db, nil
+	return DB, nil
 }
 
 //GetCollection for getting collection
