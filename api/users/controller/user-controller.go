@@ -156,15 +156,21 @@ func RsvpForEvent(c *fiber.Ctx) error {
 	var event eventModel.Event
 	errr := eventsCollection.FindOne(context.Background(), bson.M{"slug": reqBody.EventSlug}).Decode(&event)
 	if errr != nil {
-		c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "No such event/eventSlug exists",
-		})
-		return nil
+		// c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+		// 	"error": "No such event/eventSlug exists",
+		// })
+		// return nil
+	c.Set(fiber.HeaderContentType, fiber.MIMETextHTML)
+	return c.Status(fiber.StatusOK).SendString("<h3>Hmmm, It seems like you are trying to RSVP for an event that does not exist. For any other queries, you can shoot us a message over Instagram @srmkzilla</h3>")
+	
 	}
 	if event.IsCompleted {
-		c.Status(fiber.StatusLocked).JSON(fiber.Map{
-			"error": "Event is already completed",
-		})
+		// c.Status(fiber.StatusLocked).JSON(fiber.Map{
+		// 	"error": "Event is already completed",
+		// })
+	c.Set(fiber.HeaderContentType, fiber.MIMETextHTML)
+	return c.Status(fiber.StatusOK).SendString("<h3>Hey there! Sorry the event is already completed. For any other queries, you can shoot us a message over Instagram @srmkzilla</h3>")
+	
 	}
 	var user userModel.User
 	objId, _ := primitive.ObjectIDFromHex(reqBody.UserId)
@@ -185,16 +191,22 @@ func RsvpForEvent(c *fiber.Ctx) error {
 	}
 
 	if helpers.ExistsInArray(event.RSVPUsers, reqBody.UserId) {
-		c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "User already RSVPed for this event",
-		})
-		return nil
+		// c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+		// 	"error": "User already RSVPed for this event",
+		// })
+		// return nil
+	c.Set(fiber.HeaderContentType, fiber.MIMETextHTML)
+	return c.Status(fiber.StatusOK).SendString("<h3>Hey there! Don't be so anxious. Your seat has been reserved. For any other queries, you can shoot us a message over Instagram @srmkzilla</h3>")
+	
 	}
 	if len(event.RSVPUsers) >= event.MaxRsvp{
-		c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "RSVP limit exceded",
-		})
-		return nil
+		// c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+		// 	"error": "RSVP limit exceded",
+		// })
+		// return nil
+	c.Set(fiber.HeaderContentType, fiber.MIMETextHTML)
+	return c.Status(fiber.StatusOK).SendString("<h3>We're booked to capacity! We hope to see you in our next event. For any other queries, you can shoot us a message over Instagram @srmkzilla</h3>")
+	
 	}
 	event.RSVPUsers = append(event.RSVPUsers, reqBody.UserId)
 	rsvpEmbed := mailer.RsvpEmbed{
@@ -210,11 +222,13 @@ func RsvpForEvent(c *fiber.Ctx) error {
 		EmbedData:     rsvpEmbed,
 	}
 	mailer.SendEmail(sesInput)
-	c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"Success": true,
-		"Message": "User RSVPed for event",
-	})
-	return nil
+	// c.Status(fiber.StatusOK).JSON(fiber.Map{
+	// 	"Success": true,
+	// 	"Message": "User RSVPed for event",
+	// })
+	// TODO: Change to dynamic after event
+	c.Set(fiber.HeaderContentType, fiber.MIMETextHTML)
+	return c.Status(fiber.StatusOK).SendString("<h3>Your seat has been successfully reserved. You may now enter and explore the multiverse of IOT at 2:00pm on 27th of May! </h3>")
 }
 
 func GetUserById(c *fiber.Ctx) error {
