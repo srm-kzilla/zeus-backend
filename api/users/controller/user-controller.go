@@ -166,6 +166,7 @@ func RsvpForEvent(c *fiber.Ctx) error {
 	}
 	var event eventModel.Event
 	errr := eventsCollection.FindOne(context.Background(), bson.M{"slug": reqBody.EventSlug}).Decode(&event)
+	fmt.Println("Error", errr)
 	if errr != nil {
 		// c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 		// 	"error": "No such event/eventSlug exists",
