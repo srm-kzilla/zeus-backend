@@ -41,7 +41,8 @@ type Event struct {
 	Icons	    []string           		`json:"icons" bson:"icons"`
 	StartDate   string             		`validate:"required" json:"startDate" bson:"startDate"`
 	EventCover  string 					`validate:"required" json:"eventCover" bson:"eventCover"`
-	IsCompleted bool   					`json:"isCompleted" bson:"isCompleted"`
+	IsCompleted bool   					`default:"true" json:"isCompleted" bson:"isCompleted"`
+	IsRegClosed	bool					`default:"true" json:"isRegClosed" bson:"isRegClosed"`
 	RSVPUsers  []string 				`json:"rsvpUsers" bson:"rsvpUsers"`
 	MaxRsvp 	int 					`validate:"required" json:"maxRsvp" bson:"maxRsvp"`
 }

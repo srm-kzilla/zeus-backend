@@ -29,6 +29,7 @@ func SetupApp(app *fiber.App) {
 	protected.Post("/event", eventController.CreateEvent)
 	protected.Put("/event", eventController.UpdateEvent)
 	protected.Post("/event/close", eventController.CloseEvent)
+	protected.Post("/event/registration/close", eventController.CloseRegistrations)
 	protected.Post("/inevent", inEventController.InEventHandler)
 	protected.Get("/inevent/data", inEventController.GetInEventData)
 	protected.Post("/upload", eventController.UploadEventCover)

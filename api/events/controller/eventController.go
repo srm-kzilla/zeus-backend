@@ -217,11 +217,41 @@ func CloseEvent(c *fiber.Ctx) error {
 		return nil
 	}
 	event.IsCompleted = true
+	event.IsRegClosed = true
 	eventsCollection.FindOneAndReplace(context.Background(), bson.M{"slug": slug}, event)
 	c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
 		"event":   event,
 		"message":"Event is successfully closed",
+	})
+	return nil
+}
+
+func CloseRegistrations(c *fiber.Ctx) error {
+	var event eventModel.Event
+	var slug = strings.ToLower(c.Query("slug"))
+	eventsCollection, e := database.GetCollection(os.Getenv("DB_NAME"), "Events")
+	if e != nil {
+		fmt.Println("Error: ", e)
+		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
+			"error": e.Error(),
+		})
+		return nil
+	}
+	err := eventsCollection.FindOne(context.Background(), bson.M{"slug": slug}).Decode(&event)
+	if err != nil {
+		log.Println("Error ", err)
+		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+		return nil
+	}
+	event.IsRegClosed = true
+	eventsCollection.FindOneAndReplace(context.Background(), bson.M{"slug": slug}, event)
+	c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"success": true,
+		"event":   event,
+		"message":"Event Registrations is successfully closed",
 	})
 	return nil
 }

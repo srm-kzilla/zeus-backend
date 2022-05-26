@@ -75,6 +75,11 @@ func RegisterForEvent(c *fiber.Ctx) error {
 		})
 		return nil
 	}
+	if event.IsRegClosed {
+		return c.Status(fiber.StatusLocked).JSON(fiber.Map{
+			"error": "Registrations are closed",
+		})
+	}
 	var check userModel.User
 	usersCollection.FindOne(context.Background(), bson.M{
 		"$or": []bson.M{
