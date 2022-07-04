@@ -26,7 +26,7 @@
 <br>
 
 ```
-A demonstartaion of one of the api calls, returning event details.
+A demonstrataion of one of the api calls, returning event details.
 ```
 
 <div align="center">
