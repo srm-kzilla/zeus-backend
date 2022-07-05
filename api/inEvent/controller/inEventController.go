@@ -17,35 +17,27 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-
-func hasAttendance(inEventDataCollection *mongo.Collection, userData UserModel.User, slug string)(bool, error) {
+/***********************
+Checks whether an attendee has been granted attendance for the event of the given Event Slug.
+***********************/
+func hasAttendance(inEventDataCollection *mongo.Collection, userData UserModel.User, slug string) (bool, error) {
 	count, e := inEventDataCollection.CountDocuments(context.Background(), bson.M{"userId": userData.ID, "eventSlug": slug})
 	if e != nil {
 		fmt.Println("Error", e)
 		return false, e
 	}
 	fmt.Println(count)
-	if count != int64(0){
+	if count != int64(0) {
 		return true, nil
 	}
 	return false, nil
 }
 
+/***********************
+Grants attendance to the event attendee of an event of the given Event Slug.
+***********************/
 func grantAttendance(c *fiber.Ctx, inEventDataCollection *mongo.Collection, userData UserModel.User, slug string) error {
-	// count, e := inEventDataCollection.CountDocuments(context.Background(), bson.M{"userId": userData.ID, "eventSlug": slug})
-	// if e != nil {
-	// 	fmt.Println("Error", e)
-	// 	return c.Status(500).JSON(fiber.Map{
-	// 		"message": "Error while checking pre existing attendance",
-	// 		"error":   e.Error(),
-	// 	})
-	// }
-	// fmt.Println(count)
-	// if count != int64(0){
-	// 	return c.Status(409).JSON(fiber.Map{
-	// 		"message": "Attendance already granted",
-	// 	})
-	// }
+
 	attendance, err := hasAttendance(inEventDataCollection, userData, slug)
 	if err != nil {
 		fmt.Println("Error", err)
@@ -60,9 +52,9 @@ func grantAttendance(c *fiber.Ctx, inEventDataCollection *mongo.Collection, user
 		})
 	}
 	inEventData := InEventModel.InEventData{
-		ID: primitive.NewObjectID(),
-		UserID: userData.ID,
-		EventSlug: slug,
+		ID:           primitive.NewObjectID(),
+		UserID:       userData.ID,
+		EventSlug:    slug,
 		FoodReceived: false,
 	}
 	res, err := inEventDataCollection.InsertOne(context.Background(), inEventData)
@@ -79,6 +71,9 @@ func grantAttendance(c *fiber.Ctx, inEventDataCollection *mongo.Collection, user
 	})
 }
 
+/***********************
+For Handing Over refreshment packets to attendees whose attendance have been marked.
+***********************/
 func handOverFood(c *fiber.Ctx, inEventDataCollection *mongo.Collection, userData UserModel.User, slug string) error {
 	attendance, err := hasAttendance(inEventDataCollection, userData, slug)
 	if err != nil {
@@ -102,13 +97,13 @@ func handOverFood(c *fiber.Ctx, inEventDataCollection *mongo.Collection, userDat
 		})
 	}
 	fmt.Println(count)
-	if count != int64(0){
+	if count != int64(0) {
 		return c.Status(409).JSON(fiber.Map{
 			"message": "Food already handed over",
 		})
 	}
 
-	result, err := inEventDataCollection.UpdateOne(context.Background(), bson.M{"userId": userData.ID, "eventSlug":slug}, bson.M{"$set": bson.M{"foodReceived": true}})
+	result, err := inEventDataCollection.UpdateOne(context.Background(), bson.M{"userId": userData.ID, "eventSlug": slug}, bson.M{"$set": bson.M{"foodReceived": true}})
 	if err != nil {
 		fmt.Println("Error", err)
 		return c.Status(500).JSON(fiber.Map{
@@ -121,15 +116,11 @@ func handOverFood(c *fiber.Ctx, inEventDataCollection *mongo.Collection, userDat
 	})
 }
 
-func InEventHandler(c *fiber.Ctx)error {
-	// attendanceQuery := new(InEventModel.AttendanceQuery)
-	// if err := c.QueryParser(attendanceQuery); err != nil {
-	// 	fmt.Println("Error", err)
-	// 	return c.Status(400).JSON(fiber.Map{
-	// 		"message": "Query Fields missing",
-	// 		"error":   err.Error(),
-	// 	})
-	// }
+/***********************
+InEvents endpoint handling attendance and food hand-overs.
+***********************/
+func InEventHandler(c *fiber.Ctx) error {
+
 	var attendanceQuery InEventModel.AttendanceQuery
 	c.BodyParser(&attendanceQuery)
 
@@ -169,12 +160,12 @@ func InEventHandler(c *fiber.Ctx)error {
 	if e != nil {
 		fmt.Println("Error", e)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   "no such event/slug exists",
+			"error": "no such event/slug exists",
 		})
 	}
 	var userData UserModel.User
 	objId, _ := primitive.ObjectIDFromHex(attendanceQuery.UserID)
-	error := userCollection.FindOne(context.Background(), bson.M{"_id":objId, "events": bson.M{"$in": []string{attendanceQuery.Slug}}}).Decode(&userData)
+	error := userCollection.FindOne(context.Background(), bson.M{"_id": objId, "events": bson.M{"$in": []string{attendanceQuery.Slug}}}).Decode(&userData)
 	if error != nil {
 		fmt.Println("Error", error)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -201,13 +192,16 @@ func InEventHandler(c *fiber.Ctx)error {
 			"message": "Invalid action chosen",
 		})
 	}
-return nil
+	return nil
 }
 
-func GetInEventData (c *fiber.Ctx)error{
+/***********************
+Returns InEvent Data.
+***********************/
+func GetInEventData(c *fiber.Ctx) error {
 	var slug = c.Query("slug")
 	slug = strings.ToLower(slug)
-	if slug == ""{
+	if slug == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"message": "slug not provided",
 		})
@@ -231,7 +225,7 @@ func GetInEventData (c *fiber.Ctx)error{
 	if e = cursor.All(context.Background(), &eventData); e != nil {
 		fmt.Println("Error ", err)
 		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
-			"error":  err.Error(),
+			"error": err.Error(),
 		})
 	}
 	var foodHandedOver []InEventModel.InEventData
@@ -243,8 +237,8 @@ func GetInEventData (c *fiber.Ctx)error{
 	var numOfAttendees = len(eventData)
 	var numOfFoodHandedOver = len(foodHandedOver)
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"numOfAttendees": numOfAttendees,
+		"numOfAttendees":      numOfAttendees,
 		"numOfFoodHandedOver": numOfFoodHandedOver,
 	})
-		
+
 }

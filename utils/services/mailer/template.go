@@ -5,6 +5,9 @@ import (
 	"github.com/aws/aws-sdk-go/service/ses"
 )
 
+/***********************
+Generates the Mailing Template.
+***********************/
 func GenerateSESTemplate(input SESInput) (template *ses.SendEmailInput) {
 
 	html := getHTMLTemplate(input.Name, input.TemplateName, input.EmbedData)

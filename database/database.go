@@ -13,7 +13,9 @@ import (
 
 var DB *mongo.Client
 
-//GetConnection for connecting to DB
+/***********************
+For connecting to the DB.
+***********************/
 func GetConnection() (*mongo.Client, error) {
 	if os.Getenv("APP_ENV") != "production" {
 		err := godotenv.Load()
@@ -42,7 +44,9 @@ func GetConnection() (*mongo.Client, error) {
 	return DB, nil
 }
 
-//GetCollection for getting collection
+/***********************
+For getting a particular collection.
+***********************/
 func GetCollection(dbName string, collectionName string) (*mongo.Collection, error) {
 	client, err := GetConnection()
 	if err != nil {
