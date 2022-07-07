@@ -61,9 +61,9 @@ func RegisterAdmin(c *fiber.Ctx) error {
 	})
 }
 
-/***********************
+/******************************
 To log in the registered admin.
-***********************/
+******************************/
 func LoginAdmin(c *fiber.Ctx) error {
 	var user authModel.User
 	c.BodyParser(&user)
@@ -109,9 +109,9 @@ func LoginAdmin(c *fiber.Ctx) error {
 	})
 }
 
-/***********************
+/******************************************
 New Auth Token generator for an Admin User.
-***********************/
+******************************************/
 func RefreshAdmin(c *fiber.Ctx) error {
 	refreshToken := c.GetReqHeaders()["X-Refresh-Token"]
 	if refreshToken == "" {
@@ -159,9 +159,9 @@ func RefreshAdmin(c *fiber.Ctx) error {
 	})
 }
 
-/***********************
+/**********************************************************************
 Authorization Protocol allowing access to only-admin accessible routes.
-***********************/
+**********************************************************************/
 func AuthenticateAdmin(c *fiber.Ctx) error {
 	accessToken := c.GetReqHeaders()["X-Access-Token"]
 	if accessToken == "" {

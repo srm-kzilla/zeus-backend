@@ -15,9 +15,9 @@ var (
 	s3Session *s3.S3
 )
 
-/***********************
+/*****************************************************
 Initializes the Amazon Simple Storage Service Session.
-***********************/
+*****************************************************/
 func initialize() {
 	s3Session = s3.New(session.Must(session.NewSession(&aws.Config{
 		Region:      aws.String(os.Getenv("AWS_REGION")),
@@ -25,9 +25,9 @@ func initialize() {
 	})))
 }
 
-/***********************
+/**************************************************
 Displays the list of s3 buckets your account holds.
-***********************/
+**************************************************/
 func ListBuckets() (resp *s3.ListBucketsOutput) {
 	initialize()
 
@@ -39,9 +39,9 @@ func ListBuckets() (resp *s3.ListBucketsOutput) {
 	return resp
 }
 
-/***********************
+/******************************
 Uploads file on you AWS bucket.
-***********************/
+******************************/
 func UploadFile(file []byte, name string, fileSize int64) error {
 	initialize()
 	fmt.Println("sending...")

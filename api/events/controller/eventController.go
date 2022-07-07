@@ -21,9 +21,9 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-/***********************
+/***********************************************
 Get all Events present in the Events Collection.
-***********************/
+***********************************************/
 func GetAllEvents(c *fiber.Ctx) error {
 	var events []bson.M
 	eventsCollection, e := database.GetCollection(os.Getenv("DB_NAME"), "Events")
@@ -48,7 +48,7 @@ func GetAllEvents(c *fiber.Ctx) error {
 }
 
 /***********************
-Create a new Event
+   Create a new Event.
 ***********************/
 func CreateEvent(c *fiber.Ctx) error {
 	var event eventModel.Event
@@ -99,9 +99,9 @@ func CreateEvent(c *fiber.Ctx) error {
 	return nil
 }
 
-/***********************
-Get a particular Event's data from the Collection using ObjectID
-***********************/
+/****************************************************************
+Get a particular Event's data from the Collection using ObjectID.
+****************************************************************/
 func GetEventById(c *fiber.Ctx) error {
 	var event []bson.M
 	var id = c.Query("id")
@@ -136,9 +136,9 @@ func GetEventById(c *fiber.Ctx) error {
 
 }
 
-/***********************
-Get Event from collection using Event Slug
-***********************/
+/******************************************
+Get Event from collection using Event Slug.
+******************************************/
 func GetEventBySlug(c *fiber.Ctx) error {
 	// var event eventModel.Event
 	var event []bson.M
@@ -173,9 +173,9 @@ func GetEventBySlug(c *fiber.Ctx) error {
 
 }
 
-/***********************
-Get all Users of a specific Event using Event Slug
-***********************/
+/**************************************************
+Get all Users of a specific Event using Event Slug.
+**************************************************/
 func GetEventUsers(c *fiber.Ctx) error {
 	var users []userModel.User
 	var slug = strings.ToLower(c.Query("slug"))
@@ -204,9 +204,9 @@ func GetEventUsers(c *fiber.Ctx) error {
 	return nil
 }
 
-/***********************
+/****************************
 Close Event using Event Slug.
-***********************/
+****************************/
 func CloseEvent(c *fiber.Ctx) error {
 	var event eventModel.Event
 	var slug = strings.ToLower(c.Query("slug"))
@@ -237,9 +237,9 @@ func CloseEvent(c *fiber.Ctx) error {
 	return nil
 }
 
-/***********************
-Close Event Registrations using Event slug
-***********************/
+/******************************************
+Close Event Registrations using Event slug.
+******************************************/
 func CloseRegistrations(c *fiber.Ctx) error {
 	var event eventModel.Event
 	var slug = strings.ToLower(c.Query("slug"))
@@ -269,9 +269,9 @@ func CloseRegistrations(c *fiber.Ctx) error {
 	return nil
 }
 
-/***********************
+/****************************************
 Upload Event Cover File using Event Slug.
-***********************/
+****************************************/
 func UploadEventCover(c *fiber.Ctx) error {
 	var slug = c.Query("slug")
 	if slug == "" {
@@ -307,9 +307,9 @@ func UploadEventCover(c *fiber.Ctx) error {
 	return nil
 }
 
-/***********************
+/****************************************
 Add Speakers to a Event using Event Slug.
-***********************/
+****************************************/
 func AddSpeaker(c *fiber.Ctx) error {
 	var speaker eventModel.Speaker
 	var check eventModel.Speaker
@@ -371,9 +371,9 @@ func AddSpeaker(c *fiber.Ctx) error {
 	return nil
 }
 
-/***********************
+/*************************************
 Update Event Details using Event Slug.
-***********************/
+*************************************/
 func UpdateEvent(c *fiber.Ctx) error {
 	var event eventModel.Event
 	var check eventModel.Event
@@ -418,9 +418,9 @@ func UpdateEvent(c *fiber.Ctx) error {
 	return nil
 }
 
-/***********************
-Update Speaker Details using Event Slug
-***********************/
+/***************************************
+Update Speaker Details using Event Slug.
+***************************************/
 func UpdateSpeaker(c *fiber.Ctx) error {
 	var speaker eventModel.Speaker
 	var check eventModel.Speaker

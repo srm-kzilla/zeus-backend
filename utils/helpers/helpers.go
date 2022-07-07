@@ -7,9 +7,9 @@ import (
 	gonanoid "github.com/matoous/go-nanoid"
 )
 
-/***********************
+/****************************
 Generates a unique string ID.
-***********************/
+****************************/
 func GenerateNanoID(size int) string {
 	var alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 	nanoID, err := gonanoid.Generate(alphabet, size)
@@ -20,9 +20,9 @@ func GenerateNanoID(size int) string {
 	return nanoID
 }
 
-/***********************
+/******************************************
 Checks whether an item exists in the Array.
-***********************/
+******************************************/
 func ExistsInArray(Array interface{}, item interface{}) bool {
 	arr := reflect.ValueOf(Array)
 

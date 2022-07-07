@@ -8,9 +8,9 @@ import (
 	"github.com/dgrijalva/jwt-go"
 )
 
-/***********************
+/********************************************
 Generates a JWT token for every admin issuer.
-***********************/
+********************************************/
 func GenerateToken(email string) (string, error) {
 	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
 		Issuer:    email,
@@ -25,10 +25,9 @@ func GenerateToken(email string) (string, error) {
 	return token, nil
 }
 
-/***********************
+/**********************************************
 Refreshes the JWT token for every admin issuer.
-Generally to be used after the previously generated token expires.
-***********************/
+**********************************************/
 func GenerateRefreshToken(email string) (string, error) {
 	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
 		Issuer:    email,
@@ -43,9 +42,9 @@ func GenerateRefreshToken(email string) (string, error) {
 	return token, nil
 }
 
-/***********************
+/***********************************************************
 Checks for the authenticity of the JWT provided by the user.
-***********************/
+***********************************************************/
 func AuthenticateToken(token string, secretKey string) (*jwt.Token, error) {
 	return jwt.ParseWithClaims(token, &jwt.StandardClaims{}, func(t *jwt.Token) (interface{}, error) {
 		return []byte(os.Getenv(secretKey)), nil

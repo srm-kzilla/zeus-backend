@@ -17,9 +17,9 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-/***********************
+/********************************************************************************************
 Checks whether an attendee has been granted attendance for the event of the given Event Slug.
-***********************/
+********************************************************************************************/
 func hasAttendance(inEventDataCollection *mongo.Collection, userData UserModel.User, slug string) (bool, error) {
 	count, e := inEventDataCollection.CountDocuments(context.Background(), bson.M{"userId": userData.ID, "eventSlug": slug})
 	if e != nil {
@@ -33,9 +33,9 @@ func hasAttendance(inEventDataCollection *mongo.Collection, userData UserModel.U
 	return false, nil
 }
 
-/***********************
+/***************************************************************************
 Grants attendance to the event attendee of an event of the given Event Slug.
-***********************/
+***************************************************************************/
 func grantAttendance(c *fiber.Ctx, inEventDataCollection *mongo.Collection, userData UserModel.User, slug string) error {
 
 	attendance, err := hasAttendance(inEventDataCollection, userData, slug)
@@ -71,9 +71,9 @@ func grantAttendance(c *fiber.Ctx, inEventDataCollection *mongo.Collection, user
 	})
 }
 
-/***********************
+/***********************************************************************************
 For Handing Over refreshment packets to attendees whose attendance have been marked.
-***********************/
+***********************************************************************************/
 func handOverFood(c *fiber.Ctx, inEventDataCollection *mongo.Collection, userData UserModel.User, slug string) error {
 	attendance, err := hasAttendance(inEventDataCollection, userData, slug)
 	if err != nil {
@@ -116,9 +116,9 @@ func handOverFood(c *fiber.Ctx, inEventDataCollection *mongo.Collection, userDat
 	})
 }
 
-/***********************
+/*********************************************************
 InEvents endpoint handling attendance and food hand-overs.
-***********************/
+*********************************************************/
 func InEventHandler(c *fiber.Ctx) error {
 
 	var attendanceQuery InEventModel.AttendanceQuery
@@ -195,9 +195,9 @@ func InEventHandler(c *fiber.Ctx) error {
 	return nil
 }
 
-/***********************
-Returns InEvent Data.
-***********************/
+/************************
+  Returns InEvent Data.
+************************/
 func GetInEventData(c *fiber.Ctx) error {
 	var slug = c.Query("slug")
 	slug = strings.ToLower(slug)

@@ -15,7 +15,7 @@ func handleRoot(c *fiber.Ctx) error {
 func SetupApp(app *fiber.App) {
 	api := app.Group("/api")
 	api.Get("/", handleRoot)
-	api.Post("/admin/register", authController.RegisterAdmin)
+	//api.Post("/admin/register", authController.RegisterAdmin)
 	api.Post("/admin/login", authController.LoginAdmin)
 	api.Post("/admin/refresh", authController.RefreshAdmin)
 	api.Get("/event", eventController.GetEventById)

@@ -21,9 +21,9 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-/***********************
+/*********************************************************************************
 Get User data for registration and allocate the respective Event Slug to the user.
-***********************/
+*********************************************************************************/
 func RegisterForEvent(c *fiber.Ctx) error {
 	var reqBody userModel.RegisterUserReq
 	c.BodyParser(&reqBody)
@@ -136,9 +136,9 @@ func RegisterForEvent(c *fiber.Ctx) error {
 	return nil
 }
 
-/***********************
+/******************************************************************
 Checks in the RSVP parameter for the particular user for the event.
-***********************/
+******************************************************************/
 func RsvpForEvent(c *fiber.Ctx) error {
 	var reqBody userModel.RsvpUserReq
 	c.QueryParser(&reqBody)
@@ -224,9 +224,9 @@ func RsvpForEvent(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).SendString("<h3>Your seat has been successfully reserved. You may now enter and explore the multiverse of IOT at 2:00pm on 27th of May! </h3>")
 }
 
-/***********************
-Get a particular User's data from the Collection using user ObjectID
-***********************/
+/********************************************************************
+Get a particular User's data from the Collection using user ObjectID.
+********************************************************************/
 func GetUserById(c *fiber.Ctx) error {
 	userId := c.Params("userId")
 	if userId == "" {

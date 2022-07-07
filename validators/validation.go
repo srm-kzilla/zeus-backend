@@ -14,9 +14,9 @@ type ErrorResponse struct {
 	Value       string
 }
 
-/***********************
+/**************************
 Validates add user request.
-***********************/
+**************************/
 func ValidateUser(user userModel.User) []*ErrorResponse {
 	var errors []*ErrorResponse
 	validate := validator.New()
@@ -33,9 +33,9 @@ func ValidateUser(user userModel.User) []*ErrorResponse {
 	return errors
 }
 
-/***********************
+/****************************
 Validates add events request.
-***********************/
+****************************/
 func ValidateEvents(event eventModel.Event) []*ErrorResponse {
 	var errors []*ErrorResponse
 	validate := validator.New()
@@ -52,9 +52,9 @@ func ValidateEvents(event eventModel.Event) []*ErrorResponse {
 	return errors
 }
 
-/***********************
+/*****************************
 Validates add speaker request.
-***********************/
+*****************************/
 func ValidateSpeaker(speaker eventModel.Speaker) []*ErrorResponse {
 	var errors []*ErrorResponse
 	validate := validator.New()
@@ -71,9 +71,9 @@ func ValidateSpeaker(speaker eventModel.Speaker) []*ErrorResponse {
 	return errors
 }
 
-/***********************
+/*********************************************
 Validates user registration for event request.
-***********************/
+*********************************************/
 func ValidateRegisterUserReq(reqBody userModel.RegisterUserReq) []*ErrorResponse {
 	var errors []*ErrorResponse
 	validate := validator.New()
@@ -90,9 +90,9 @@ func ValidateRegisterUserReq(reqBody userModel.RegisterUserReq) []*ErrorResponse
 	return errors
 }
 
-/***********************
+/*************************************
 Validates user RSVP for event request.
-***********************/
+*************************************/
 func ValidateRsvpUserReq(reqBody userModel.RsvpUserReq) []*ErrorResponse {
 	var errors []*ErrorResponse
 	validate := validator.New()
@@ -109,9 +109,9 @@ func ValidateRsvpUserReq(reqBody userModel.RsvpUserReq) []*ErrorResponse {
 	return errors
 }
 
-/***********************
+/************************************
 Validates register new admin request.
-***********************/
+************************************/
 func ValidateAdminUser(reqBody authModel.User) []*ErrorResponse {
 	var errors []*ErrorResponse
 	validate := validator.New()
@@ -128,9 +128,9 @@ func ValidateAdminUser(reqBody authModel.User) []*ErrorResponse {
 	return errors
 }
 
-/***********************
+/*******************************************
 Validates user attendance for event request.
-***********************/
+*******************************************/
 func ValidateAttendanceQuery(reqBody inEventModel.AttendanceQuery) []*ErrorResponse {
 	var errors []*ErrorResponse
 	validate := validator.New()

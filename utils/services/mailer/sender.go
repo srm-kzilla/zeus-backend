@@ -13,7 +13,7 @@ import (
 )
 
 /***********************
-Sends the email.
+    Sends the email.
 ***********************/
 func SendEmail(sesInput SESInput) {
 

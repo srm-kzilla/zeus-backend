@@ -12,9 +12,9 @@ var TEMPLATES = TemplateNames{
 	NewUserTemplate: "newUserTemplate.html",
 }
 
-/***********************
+/**************************
 Gets the the HTML template.
-***********************/
+**************************/
 func getHTMLTemplate(name string, templateName string, embedData interface{}) string {
 	var templateBuffer bytes.Buffer
 
