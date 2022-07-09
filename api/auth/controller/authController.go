@@ -17,6 +17,9 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+/***********************
+To register a new Admin.
+***********************/
 func RegisterAdmin(c *fiber.Ctx) error {
 	var user authModel.User
 	c.BodyParser(&user)
@@ -43,23 +46,25 @@ func RegisterAdmin(c *fiber.Ctx) error {
 	pwd, _ := bcrypt.GenerateFromPassword([]byte(user.Password), 14)
 	user.Password = string(pwd)
 	user.CreatedAt = time.Now()
-	
+
 	res, e := adminCollection.InsertOne(context.Background(), user)
 	if e != nil {
 		return c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
-			"error": e.Error(),
+			"error":      e.Error(),
 			"InsertedId": res.InsertedID,
 		})
 	}
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"success":	true,
-		"message":	"Admin user created successfully",
-		"email": 	user.Email,
+		"success": true,
+		"message": "Admin user created successfully",
+		"email":   user.Email,
 	})
 }
 
-
-func LoginAdmin(c *fiber.Ctx)error {
+/******************************
+To log in the registered admin.
+******************************/
+func LoginAdmin(c *fiber.Ctx) error {
 	var user authModel.User
 	c.BodyParser(&user)
 
@@ -96,15 +101,18 @@ func LoginAdmin(c *fiber.Ctx)error {
 		})
 	}
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"success":	true,
-		"message":	"Login successful",
-		"token":	token,
-		"refresh":	refresh,
-		"email": user.Email,
+		"success": true,
+		"message": "Login successful",
+		"token":   token,
+		"refresh": refresh,
+		"email":   user.Email,
 	})
 }
 
-func RefreshAdmin(c *fiber.Ctx)error {
+/******************************************
+New Auth Token generator for an Admin User.
+******************************************/
+func RefreshAdmin(c *fiber.Ctx) error {
 	refreshToken := c.GetReqHeaders()["X-Refresh-Token"]
 	if refreshToken == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -112,11 +120,11 @@ func RefreshAdmin(c *fiber.Ctx)error {
 		})
 	}
 
-	token, err := authService.AutheticateToken(refreshToken, "REFRESH")
+	token, err := authService.AuthenticateToken(refreshToken, "REFRESH")
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,
-			"message":"Invalid refresh token",
+			"message": "Invalid refresh token",
 		})
 	}
 	claims := token.Claims.(*jwt.StandardClaims)
@@ -146,23 +154,26 @@ func RefreshAdmin(c *fiber.Ctx)error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
 		"message": "Refresh successful",
-		"token": accessToken,
-		"refresh":refreshToken,
+		"token":   accessToken,
+		"refresh": refreshToken,
 	})
 }
 
-func AuthenticateAdmin(c *fiber.Ctx)error {
-	accessToken:= c.GetReqHeaders()["X-Access-Token"]
+/**********************************************************************
+Authorization Protocol allowing access to only-admin accessible routes.
+**********************************************************************/
+func AuthenticateAdmin(c *fiber.Ctx) error {
+	accessToken := c.GetReqHeaders()["X-Access-Token"]
 	if accessToken == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "No access token provided",
 		})
 	}
-	token, err := authService.AutheticateToken(accessToken, "SECRET")
+	token, err := authService.AuthenticateToken(accessToken, "SECRET")
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,
-			"message":"Invalid access token",
+			"message": "Invalid access token",
 		})
 	}
 	claims := token.Claims.(*jwt.StandardClaims)
@@ -182,6 +193,6 @@ func AuthenticateAdmin(c *fiber.Ctx)error {
 			"error": "Email does not exist",
 		})
 	}
-	fmt.Println("Admin : ",email)
+	fmt.Println("Admin : ", email)
 	return c.Next()
 }

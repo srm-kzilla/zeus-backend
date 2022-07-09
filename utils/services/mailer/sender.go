@@ -12,6 +12,9 @@ import (
 	"github.com/aws/aws-sdk-go/service/ses"
 )
 
+/***********************
+    Sends the email.
+***********************/
 func SendEmail(sesInput SESInput) {
 
 	emailTemplate := GenerateSESTemplate(sesInput)
@@ -32,30 +35,29 @@ func SendEmail(sesInput SESInput) {
 	service := ses.New(sess)
 
 	if os.Getenv("ENV") == "prod" {
-	// Attempt to send the email.
-	_, err = service.SendEmail(emailTemplate)
+		// Attempt to send the email.
+		_, err = service.SendEmail(emailTemplate)
 
-	// Display error messages if they occur.
-	if err != nil {
-		if aerr, ok := err.(awserr.Error); ok {
-			switch aerr.Code() {
-			case ses.ErrCodeMessageRejected:
-				fmt.Println(ses.ErrCodeMessageRejected, aerr.Error())
-			case ses.ErrCodeMailFromDomainNotVerifiedException:
-				fmt.Println(ses.ErrCodeMailFromDomainNotVerifiedException, aerr.Error())
-			case ses.ErrCodeConfigurationSetDoesNotExistException:
-				fmt.Println(ses.ErrCodeConfigurationSetDoesNotExistException, aerr.Error())
-			default:
-				fmt.Println(aerr.Error())
+		// Display error messages if they occur.
+		if err != nil {
+			if aerr, ok := err.(awserr.Error); ok {
+				switch aerr.Code() {
+				case ses.ErrCodeMessageRejected:
+					fmt.Println(ses.ErrCodeMessageRejected, aerr.Error())
+				case ses.ErrCodeMailFromDomainNotVerifiedException:
+					fmt.Println(ses.ErrCodeMailFromDomainNotVerifiedException, aerr.Error())
+				case ses.ErrCodeConfigurationSetDoesNotExistException:
+					fmt.Println(ses.ErrCodeConfigurationSetDoesNotExistException, aerr.Error())
+				default:
+					fmt.Println(aerr.Error())
+				}
+			} else {
+				// Print the error, cast err to awserr.Error to get the Code and
+				// Message from an error.
+				fmt.Println(err.Error())
 			}
-		} else {
-			// Print the error, cast err to awserr.Error to get the Code and
-			// Message from an error.
-			fmt.Println(err.Error())
 		}
-	}
 	}
 
 	log.Printf("Email Sent to address: %s", sesInput.RecieverEmail)
-	// fmt.Println(result)
 }
