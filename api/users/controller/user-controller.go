@@ -171,6 +171,8 @@ func RsvpForEvent(c *fiber.Ctx) error {
 	fmt.Println("Error", errr)
 	if errr != nil {
 		c.Set(fiber.HeaderContentType, fiber.MIMETextHTML)
+		errrr := eventsCollection.FindOne(context.Background(), bson.M{"socialHandle": bson.M{"$exists": true}}).Decode(&event)
+		fmt.Println("Error", errrr)
 		message := fmt.Sprintf("<h3>Hmmm, It seems like you are trying to RSVP for an event that does not exist. For any other queries, you can shoot us a message over %s %s</h3>", event.SocialHandle[0].MediaType, event.SocialHandle[0].MediaHandle)
 		return c.Status(fiber.StatusOK).SendString(message)
 	}
