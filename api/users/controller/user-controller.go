@@ -171,15 +171,11 @@ func RsvpForEvent(c *fiber.Ctx) error {
 	fmt.Println("Error", errr)
 	if errr != nil {
 		c.Set(fiber.HeaderContentType, fiber.MIMETextHTML)
-		errrr := eventsCollection.FindOne(context.Background(), bson.M{"socialHandle": bson.M{"$exists": true}}).Decode(&event)
-		fmt.Println("Error", errrr)
-		message := fmt.Sprintf("<h3>Hmmm, It seems like you are trying to RSVP for an event that does not exist. For any other queries, you can shoot us a message over %s %s</h3>", event.SocialHandle[0].MediaType, event.SocialHandle[0].MediaHandle)
-		return c.Status(fiber.StatusOK).SendString(message)
+		return c.Status(fiber.StatusOK).SendString("<h3>Hmmm, It seems like you are trying to RSVP for an event that does not exist. For any other queries, you can shoot us a message over Instagram @srmkzilla</h3>")
 	}
 	if event.IsCompleted {
 		c.Set(fiber.HeaderContentType, fiber.MIMETextHTML)
-		message := fmt.Sprintf("<h3>Hey there! Sorry the event is already completed. For any other queries, you can shoot us a message over %s %s</h3>", event.SocialHandle[0].MediaType, event.SocialHandle[0].MediaHandle)
-		return c.Status(fiber.StatusOK).SendString(message)
+		return c.Status(fiber.StatusOK).SendString("<h3>Hey there! Sorry the event is already completed. For any other queries, you can shoot us a message over Instagram @srmkzilla</h3>")
 	}
 	var user userModel.User
 	objId, _ := primitive.ObjectIDFromHex(reqBody.UserId)
@@ -201,13 +197,11 @@ func RsvpForEvent(c *fiber.Ctx) error {
 
 	if helpers.ExistsInArray(event.RSVPUsers, reqBody.UserId) {
 		c.Set(fiber.HeaderContentType, fiber.MIMETextHTML)
-		message := fmt.Sprintf("<h3>Hey there! Don't be so anxious. Your seat has been reserved. For any other queries, you can shoot us a message over %s %s</h3>", event.SocialHandle[0].MediaType, event.SocialHandle[0].MediaHandle)
-		return c.Status(fiber.StatusOK).SendString(message)
+		return c.Status(fiber.StatusOK).SendString("<h3>Hey there! Don't be so anxious. Your seat has been reserved. For any other queries, you can shoot us a message over Instagram @srmkzilla</h3>")
 	}
 	if len(event.RSVPUsers) >= event.MaxRsvp {
 		c.Set(fiber.HeaderContentType, fiber.MIMETextHTML)
-		message := fmt.Sprintf("<h3>We're booked to capacity! We hope to see you in our next event. For any other queries, you can shoot us a message over %s %s</h3>", event.SocialHandle[0].MediaType, event.SocialHandle[0].MediaHandle)
-		return c.Status(fiber.StatusOK).SendString(message)
+		return c.Status(fiber.StatusOK).SendString("<h3>We're booked to capacity! We hope to see you in our next event. For any other queries, you can shoot us a message over Instagram @srmkzilla</h3>")
 	}
 	event.RSVPUsers = append(event.RSVPUsers, reqBody.UserId)
 	rsvpEmbed := mailer.RsvpEmbed{
