@@ -198,12 +198,10 @@ func RsvpForEvent(c *fiber.Ctx) error {
 	if helpers.ExistsInArray(event.RSVPUsers, reqBody.UserId) {
 		c.Set(fiber.HeaderContentType, fiber.MIMETextHTML)
 		return c.Status(fiber.StatusOK).SendString("<h3>Hey there! Don't be so anxious. Your seat has been reserved. For any other queries, you can shoot us a message over Instagram @srmkzilla</h3>")
-
 	}
 	if len(event.RSVPUsers) >= event.MaxRsvp {
 		c.Set(fiber.HeaderContentType, fiber.MIMETextHTML)
 		return c.Status(fiber.StatusOK).SendString("<h3>We're booked to capacity! We hope to see you in our next event. For any other queries, you can shoot us a message over Instagram @srmkzilla</h3>")
-
 	}
 	event.RSVPUsers = append(event.RSVPUsers, reqBody.UserId)
 	rsvpEmbed := mailer.RsvpEmbed{
@@ -221,7 +219,8 @@ func RsvpForEvent(c *fiber.Ctx) error {
 	mailer.SendEmail(sesInput)
 
 	c.Set(fiber.HeaderContentType, fiber.MIMETextHTML)
-	return c.Status(fiber.StatusOK).SendString("<h3>Your seat has been successfully reserved. You may now enter and explore the multiverse of IOT at 2:00pm on 27th of May! </h3>")
+	message := fmt.Sprintf("<h3>Your seat has been successfully reserved. You may now enter and explore the %s at %s on %s! </h3>", event.Title, event.Timeline[0].Date, event.StartDate)
+	return c.Status(fiber.StatusOK).SendString(message)
 }
 
 /********************************************************************
