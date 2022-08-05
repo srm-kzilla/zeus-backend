@@ -6,8 +6,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v4"
 	authModel "github.com/srm-kzilla/events/api/auth/model"
 	authService "github.com/srm-kzilla/events/api/auth/service"
 	"github.com/srm-kzilla/events/database"
