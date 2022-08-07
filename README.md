@@ -65,8 +65,8 @@ Please read `Contributing.md` for details on our code of conduct, and the proces
 
 A huge shout out to the amazing devs without whom none of this would've been possible.
 
-| <p align="center">![Eshan Singh](https://github.com/kevin-aaaquil.png?size=128)<br>[Eshan Singh](https://github.com/kevin-aaaquil)</p> | <p align="center">![Sagnik Biswas](https://github.com/sbiswas2209.png?size=128)<br>[Sagnik Biswas](https://github.com/sbiswas2209)</p> | <p align="center">![Aryan Singh](https://github.com/meltedhyperion.png?size=128)<br>[Aryan Singh](https://github.com/meltedhyperion)</p> |
-| -------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| <p align="center">![Eshan Singh](https://github.com/kevin-aaaquil.png?size=128)<br>[Eshan Singh](https://github.com/kevin-aaaquil)</p> | <p align="center">![Sagnik Biswas](https://github.com/sbiswas2209.png?size=128)<br>[Sagnik Biswas](https://github.com/sbiswas2209)</p> | <p align="center">![Aryan Singh](https://github.com/meltedhyperion.png?size=128)<br>[Aryan Singh](https://github.com/meltedhyperion)</p> |<p align="center">![Rahul Sharma](https://github.com/RahulSharma099.png?size=128)<br>[Rahul Sharma](https://github.com/RahulSharma099)</p> |
+| -------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
 
 ## Forking this repo 🚨
 
