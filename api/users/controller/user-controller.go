@@ -171,11 +171,21 @@ func RsvpForEvent(c *fiber.Ctx) error {
 	fmt.Println("Error", errr)
 	if errr != nil {
 		c.Set(fiber.HeaderContentType, fiber.MIMETextHTML)
-		return c.Status(fiber.StatusOK).SendString("<h3>Hmmm, It seems like you are trying to RSVP for an event that does not exist. For any other queries, you can shoot us a message over Instagram @srmkzilla</h3>")
+		message := "Hmmm, It seems like you are trying to RSVP for an event that does not exist. For any other queries, you can shoot us a message over Instagram @srmkzilla"
+
+		c.Status(fiber.StatusOK)
+		return c.Render("rsvpConfirmationTemplate", fiber.Map{
+			"Message": message,
+		})
 	}
 	if event.IsCompleted {
 		c.Set(fiber.HeaderContentType, fiber.MIMETextHTML)
-		return c.Status(fiber.StatusOK).SendString("<h3>Hey there! Sorry the event is already completed. For any other queries, you can shoot us a message over Instagram @srmkzilla</h3>")
+		message := "Hey there! Sorry the event is already completed. For any other queries, you can shoot us a message over Instagram @srmkzilla"
+
+		c.Status(fiber.StatusOK)
+		return c.Render("rsvpConfirmationTemplate", fiber.Map{
+			"Message": message,
+		})
 	}
 	var user userModel.User
 	objId, _ := primitive.ObjectIDFromHex(reqBody.UserId)
@@ -197,11 +207,21 @@ func RsvpForEvent(c *fiber.Ctx) error {
 
 	if helpers.ExistsInArray(event.RSVPUsers, reqBody.UserId) {
 		c.Set(fiber.HeaderContentType, fiber.MIMETextHTML)
-		return c.Status(fiber.StatusOK).SendString("<h3>Hey there! Don't be so anxious. Your seat has been reserved. For any other queries, you can shoot us a message over Instagram @srmkzilla</h3>")
+		message := "Hey there! Don't be so anxious. Your seat has been reserved. For any other queries, you can shoot us a message over Instagram @srmkzilla"
+
+		c.Status(fiber.StatusOK)
+		return c.Render("rsvpConfirmationTemplate", fiber.Map{
+			"Message": message,
+		})
 	}
 	if len(event.RSVPUsers) >= event.MaxRsvp {
 		c.Set(fiber.HeaderContentType, fiber.MIMETextHTML)
-		return c.Status(fiber.StatusOK).SendString("<h3>We're booked to capacity! We hope to see you in our next event. For any other queries, you can shoot us a message over Instagram @srmkzilla</h3>")
+		message := "We're booked to capacity! We hope to see you in our next event. For any other queries, you can shoot us a message over Instagram @srmkzilla"
+
+		c.Status(fiber.StatusOK)
+		return c.Render("rsvpConfirmationTemplate", fiber.Map{
+			"Message": message,
+		})
 	}
 	event.RSVPUsers = append(event.RSVPUsers, reqBody.UserId)
 	rsvpEmbed := mailer.RsvpEmbed{
@@ -219,8 +239,13 @@ func RsvpForEvent(c *fiber.Ctx) error {
 	mailer.SendEmail(sesInput)
 
 	c.Set(fiber.HeaderContentType, fiber.MIMETextHTML)
-	message := fmt.Sprintf("<h3>Your seat has been successfully reserved. You may now enter and explore the %s at %s on %s! </h3>", event.Title, event.Timeline[0].Date, event.StartDate)
-	return c.Status(fiber.StatusOK).SendString(message)
+	message := fmt.Sprintf("Your seat has been successfully reserved. You may now enter and explore the %s at %s on %s! ", event.Title, event.Timeline[0].Date, event.StartDate)
+
+	c.Status(fiber.StatusOK)
+	return c.Render("rsvpConfirmationTemplate", fiber.Map{
+		"Message": message,
+	})
+
 }
 
 /********************************************************************

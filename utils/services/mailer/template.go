@@ -10,7 +10,7 @@ Generates the Mailing Template.
 ******************************/
 func GenerateSESTemplate(input SESInput) (template *ses.SendEmailInput) {
 
-	html := getHTMLTemplate(input.Name, input.TemplateName, input.EmbedData)
+	html := getHTMLTemplate(input.TemplateName, input.EmbedData)
 	title := input.Subject
 	template = &ses.SendEmailInput{
 		Destination: &ses.Destination{

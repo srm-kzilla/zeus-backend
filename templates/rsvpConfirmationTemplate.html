@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script
+      defer
+      src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"
+    ></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        color: white;
+        font-family: "Montserrat", sans-serif;
+      }
+      body {
+        background-color: #151319;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 0.5rem;
+        overflow: hidden;
+      }
+      h1 {
+        text-align: center;
+        max-width: 768px;
+        font-size: 2rem;
+      }
+      .lottie {
+        width: 500px;
+        max-width: 98%;
+      }
+      @media screen and (max-width: 768px) {
+        h1 {
+          font-size: 1.5rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <lottie-player
+      src="https://assets2.lottiefiles.com/packages/lf20_znxedwj6.json"
+      background="transparent"
+      speed="1"
+      class="lottie"
+      loop
+      autoplay
+    ></lottie-player>
+    <h1>{{.Message}}</h1>
+  </body>
+</html>

@@ -8,6 +8,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/gofiber/template/html"
 	"github.com/joho/godotenv"
 	api "github.com/srm-kzilla/events/api"
 )
@@ -38,7 +39,12 @@ func init() {
 
 func main() {
 	log.Println("Server Starting!!!")
-	app := fiber.New()
+
+	engine := html.New("./templates", ".html")
+
+	app := fiber.New(fiber.Config{
+		Views: engine,
+	})
 
 	// Creating a logger middleware
 	app.Use(logger.New())

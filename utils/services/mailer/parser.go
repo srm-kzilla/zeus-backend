@@ -15,7 +15,7 @@ var TEMPLATES = TemplateNames{
 /**************************
 Gets the the HTML template.
 **************************/
-func getHTMLTemplate(name string, templateName string, embedData interface{}) string {
+func getHTMLTemplate(templateName string, embedData interface{}) string {
 	var templateBuffer bytes.Buffer
 
 	htmlData, err := ioutil.ReadFile("./templates/" + templateName)
