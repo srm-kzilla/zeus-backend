@@ -21,6 +21,14 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+var animations = userModel.Animation{
+	RsvpSuccess:       "https://assets2.lottiefiles.com/packages/lf20_znxedwj6.json",
+	EventCompleted:    "https://assets8.lottiefiles.com/packages/lf20_rbbibjz5.json",
+	EventDoesNotExist: "https://assets8.lottiefiles.com/packages/lf20_rbbibjz5.json",
+	AlreadyRsvpd:      "https://assets2.lottiefiles.com/packages/lf20_znxedwj6.json",
+	FullyBooked:       "https://assets8.lottiefiles.com/packages/lf20_rbbibjz5.json",
+}
+
 /*********************************************************************************
 Get User data for registration and allocate the respective Event Slug to the user.
 *********************************************************************************/
@@ -172,7 +180,7 @@ func RsvpForEvent(c *fiber.Ctx) error {
 	if errr != nil {
 		c.Set(fiber.HeaderContentType, fiber.MIMETextHTML)
 		message := "Hmmm, It seems like you are trying to RSVP for an event that does not exist. For any other queries, you can shoot us a message over Instagram @srmkzilla"
-		lottieFile := "https://assets8.lottiefiles.com/packages/lf20_rbbibjz5.json"
+		lottieFile := animations.EventDoesNotExist
 		c.Status(fiber.StatusOK)
 		return c.Render("rsvpConfirmationTemplate", fiber.Map{
 			"Message":    message,
@@ -182,7 +190,7 @@ func RsvpForEvent(c *fiber.Ctx) error {
 	if event.IsCompleted {
 		c.Set(fiber.HeaderContentType, fiber.MIMETextHTML)
 		message := "Hey there! Sorry the event is already completed. For any other queries, you can shoot us a message over Instagram @srmkzilla"
-		lottieFile := "https://assets8.lottiefiles.com/packages/lf20_rbbibjz5.json"
+		lottieFile := animations.EventCompleted
 		c.Status(fiber.StatusOK)
 		return c.Render("rsvpConfirmationTemplate", fiber.Map{
 			"Message":    message,
@@ -210,7 +218,7 @@ func RsvpForEvent(c *fiber.Ctx) error {
 	if helpers.ExistsInArray(event.RSVPUsers, reqBody.UserId) {
 		c.Set(fiber.HeaderContentType, fiber.MIMETextHTML)
 		message := "Hey there! Don't be so anxious. Your seat has been reserved. For any other queries, you can shoot us a message over Instagram @srmkzilla"
-		lottieFile := "https://assets2.lottiefiles.com/packages/lf20_znxedwj6.json"
+		lottieFile := animations.AlreadyRsvpd
 		c.Status(fiber.StatusOK)
 		return c.Render("rsvpConfirmationTemplate", fiber.Map{
 			"Message":    message,
@@ -220,7 +228,7 @@ func RsvpForEvent(c *fiber.Ctx) error {
 	if len(event.RSVPUsers) >= event.MaxRsvp {
 		c.Set(fiber.HeaderContentType, fiber.MIMETextHTML)
 		message := "We're booked to capacity! We hope to see you in our next event. For any other queries, you can shoot us a message over Instagram @srmkzilla"
-		lottieFile := "https://assets8.lottiefiles.com/packages/lf20_rbbibjz5.json"
+		lottieFile := animations.FullyBooked
 		c.Status(fiber.StatusOK)
 		return c.Render("rsvpConfirmationTemplate", fiber.Map{
 			"Message":    message,
@@ -244,7 +252,7 @@ func RsvpForEvent(c *fiber.Ctx) error {
 
 	c.Set(fiber.HeaderContentType, fiber.MIMETextHTML)
 	message := fmt.Sprintf("Your seat has been successfully reserved. You may now enter and explore the %s at %s on %s! ", event.Title, event.Timeline[0].Date, event.StartDate)
-	lottieFile := "https://assets2.lottiefiles.com/packages/lf20_znxedwj6.json"
+	lottieFile := animations.RsvpSuccess
 	c.Status(fiber.StatusOK)
 	return c.Render("rsvpConfirmationTemplate", fiber.Map{
 		"Message":    message,

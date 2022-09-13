@@ -28,3 +28,11 @@ type RsvpUserReq struct {
 	UserId    string `validate:"required" json:"userId" bson:"userId"`
 	EventSlug string `validate:"required" json:"eventSlug" bson:"eventSlug"`
 }
+
+type Animation struct {
+	RsvpSuccess       string
+	EventCompleted    string
+	EventDoesNotExist string
+	AlreadyRsvpd      string
+	FullyBooked       string
+}
