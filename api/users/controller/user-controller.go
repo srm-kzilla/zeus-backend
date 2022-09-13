@@ -220,7 +220,7 @@ func RsvpForEvent(c *fiber.Ctx) error {
 	if len(event.RSVPUsers) >= event.MaxRsvp {
 		c.Set(fiber.HeaderContentType, fiber.MIMETextHTML)
 		message := "We're booked to capacity! We hope to see you in our next event. For any other queries, you can shoot us a message over Instagram @srmkzilla"
-		lottieFile := "https://assets6.lottiefiles.com/packages/lf20_cn2vcsga.json"
+		lottieFile := "https://assets8.lottiefiles.com/packages/lf20_rbbibjz5.json"
 		c.Status(fiber.StatusOK)
 		return c.Render("rsvpConfirmationTemplate", fiber.Map{
 			"Message":    message,
