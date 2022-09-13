@@ -34,7 +34,18 @@
         text-align: center;
         max-width: 768px;
         font-size: 2rem;
+        -webkit-animation: myfirst 6s; 
+        animation: myfirst 10 s;
       }
+      @-webkit-keyframes myfirst {  
+        from {color: #fff;}  
+        to {color: rgb(255,100,78);}  
+      }  
+      
+      @keyframes myfirst {  
+        from {color: rgb(255,100,78);}  
+        to {color: #fff;}  
+      } 
       .lottie {
         width: 500px;
         max-width: 98%;
@@ -48,11 +59,10 @@
   </head>
   <body>
     <lottie-player
-      src="https://assets2.lottiefiles.com/packages/lf20_znxedwj6.json"
+      src="{{.LottieFile}}"
       background="transparent"
       speed="1"
       class="lottie"
-      loop
       autoplay
     ></lottie-player>
     <h1>{{.Message}}</h1>
