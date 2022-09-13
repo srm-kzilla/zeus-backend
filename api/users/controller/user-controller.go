@@ -179,7 +179,7 @@ func RsvpForEvent(c *fiber.Ctx) error {
 	fmt.Println("Error", errr)
 	if errr != nil {
 		c.Set(fiber.HeaderContentType, fiber.MIMETextHTML)
-		message := "Hmmm, It seems like you are trying to RSVP for an event that does not exist. For any other queries, you can shoot us a message over Instagram @srmkzilla"
+		message := "Hmmm, It seems like you are trying to RSVP for an event that does not exist."
 		lottieFile := animations.EventDoesNotExist
 		c.Status(fiber.StatusOK)
 		return c.Render("rsvpConfirmationTemplate", fiber.Map{
@@ -189,7 +189,7 @@ func RsvpForEvent(c *fiber.Ctx) error {
 	}
 	if event.IsCompleted {
 		c.Set(fiber.HeaderContentType, fiber.MIMETextHTML)
-		message := "Hey there! Sorry the event is already completed. For any other queries, you can shoot us a message over Instagram @srmkzilla"
+		message := "Hey there! Sorry the event is already completed."
 		lottieFile := animations.EventCompleted
 		c.Status(fiber.StatusOK)
 		return c.Render("rsvpConfirmationTemplate", fiber.Map{
@@ -217,7 +217,7 @@ func RsvpForEvent(c *fiber.Ctx) error {
 
 	if helpers.ExistsInArray(event.RSVPUsers, reqBody.UserId) {
 		c.Set(fiber.HeaderContentType, fiber.MIMETextHTML)
-		message := "Hey there! Don't be so anxious. Your seat has been reserved. For any other queries, you can shoot us a message over Instagram @srmkzilla"
+		message := "Hey there! Don't be so anxious. Your seat has been reserved."
 		lottieFile := animations.AlreadyRsvpd
 		c.Status(fiber.StatusOK)
 		return c.Render("rsvpConfirmationTemplate", fiber.Map{
@@ -227,7 +227,7 @@ func RsvpForEvent(c *fiber.Ctx) error {
 	}
 	if len(event.RSVPUsers) >= event.MaxRsvp {
 		c.Set(fiber.HeaderContentType, fiber.MIMETextHTML)
-		message := "We're booked to capacity! We hope to see you in our next event. For any other queries, you can shoot us a message over Instagram @srmkzilla"
+		message := "We're booked to capacity! We hope to see you in our next event."
 		lottieFile := animations.FullyBooked
 		c.Status(fiber.StatusOK)
 		return c.Render("rsvpConfirmationTemplate", fiber.Map{
