@@ -99,7 +99,7 @@ func RegisterForEvent(c *fiber.Ctx) error {
 			{"regNumber": user.RegNumber},
 		},
 	}).Decode(&check)
-	fmt.Println(check)
+	// fmt.Println(check)
 	if !(check.Email == "") && !(check.Email == user.Email && check.PhoneNumber == user.PhoneNumber && check.RegNumber == user.RegNumber) {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "User already exists",
@@ -114,9 +114,22 @@ func RegisterForEvent(c *fiber.Ctx) error {
 		}
 		check.EventSlugs = append(check.EventSlugs, reqBody.EventSlug)
 		usersCollection.FindOneAndReplace(context.Background(), bson.M{"email": user.Email}, check)
+		newUserEmbed := mailer.NewUserEmbed{
+			Name: user.Name,
+		}
+		sesInput := mailer.SESInput{
+			TemplateName:  mailer.TEMPLATES.NewUserTemplate,
+			Subject:       "Registration Successfull",
+			Name:          user.Name,
+			RecieverEmail: user.Email,
+			SenderEmail:   os.Getenv("SENDER_EMAIL"),
+			EmbedData:     newUserEmbed,
+		}
+		mailer.SendEmail(sesInput)
 		c.Status(fiber.StatusCreated).JSON(check)
 		return nil
 	}
+	fmt.Print("Does this run for repeat")
 	user.ID = primitive.NewObjectID()
 	user.EventSlugs = append(user.EventSlugs, reqBody.EventSlug)
 	res, err := usersCollection.InsertOne(context.Background(), user)
