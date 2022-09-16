@@ -129,7 +129,7 @@ func RegisterForEvent(c *fiber.Ctx) error {
 		c.Status(fiber.StatusCreated).JSON(check)
 		return nil
 	}
-	fmt.Print("Does this run for repeat")
+	// fmt.Print("Does this run for repeat")
 	user.ID = primitive.NewObjectID()
 	user.EventSlugs = append(user.EventSlugs, reqBody.EventSlug)
 	res, err := usersCollection.InsertOne(context.Background(), user)
@@ -264,7 +264,7 @@ func RsvpForEvent(c *fiber.Ctx) error {
 	mailer.SendEmail(sesInput)
 
 	c.Set(fiber.HeaderContentType, fiber.MIMETextHTML)
-	message := fmt.Sprintf("Your seat has been successfully reserved. You may now enter and explore the %s at %s on %s! ", event.Title, event.Timeline[0].Date, event.StartDate)
+	message := fmt.Sprintf("Your seat has been successfully reserved. You may now enter and explore the %s at %s on %s! ", event.Title, strings.Split(event.Timeline[0].Date, " ")[1], event.StartDate)
 	lottieFile := animations.RsvpSuccess
 	c.Status(fiber.StatusOK)
 	return c.Render("rsvpConfirmationTemplate", fiber.Map{
