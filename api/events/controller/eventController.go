@@ -33,7 +33,7 @@ func GetAllEvents(c *fiber.Ctx) error {
 			"error": e.Error(),
 		})
 	}
-	lookupStage := bson.D{{"$lookup", bson.D{{"from", "Speakers"}, {"localField", "slug"}, {"foreignField", "slug"}, {"as", "speakers"}}}, {"$project", bson.D{{"rsvpUsers", 0}}}}
+	lookupStage := bson.D{{"$lookup", bson.D{{"from", "Speakers"}, {"localField", "slug"}, {"foreignField", "slug"}, {"as", "speakers"}}}}
 	cursor, err := eventsCollection.Aggregate(context.Background(), mongo.Pipeline{lookupStage, bson.D{{"$sort", bson.D{{"_id", -1}}}}})
 	if err = cursor.All(context.Background(), &events); err != nil {
 		log.Println("Error ", err)
