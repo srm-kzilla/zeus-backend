@@ -244,7 +244,8 @@ func RsvpForEvent(c *fiber.Ctx) error {
 	mailer.SendEmail(sesInput)
 
 	c.Set(fiber.HeaderContentType, fiber.MIMETextHTML)
-	message := fmt.Sprintf("Your seat has been successfully reserved. You may now enter and explore the %s at %s on %s! ", event.Title, event.Timeline[0].Date, event.StartDate)
+
+	message := fmt.Sprintf("Your seat has been successfully reserved. You may now enter and explore the %s at %s on %s! ", event.Title, strings.Split(event.Timeline[0].Date, " ")[1], event.StartDate)
 	lottieFile := constants.Animations.RsvpSuccess
 	c.Status(fiber.StatusOK)
 	return c.Render("rsvpConfirmationTemplate", fiber.Map{

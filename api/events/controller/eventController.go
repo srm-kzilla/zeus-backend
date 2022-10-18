@@ -34,7 +34,7 @@ func GetAllEvents(c *fiber.Ctx) error {
 		})
 	}
 	lookupStage := bson.D{{"$lookup", bson.D{{"from", "Speakers"}, {"localField", "slug"}, {"foreignField", "slug"}, {"as", "speakers"}}}}
-	cursor, err := eventsCollection.Aggregate(context.Background(), mongo.Pipeline{lookupStage, bson.D{{"$sort", bson.D{{"_id", -1}}}}})
+	cursor, err := eventsCollection.Aggregate(context.Background(), mongo.Pipeline{lookupStage, bson.D{{"$sort", bson.D{{"_id", -1}}}}, bson.D{{"$project",bson.D{{"rsvpUsers",0}}}}})
 	if err = cursor.All(context.Background(), &events); err != nil {
 		log.Println("Error ", err)
 		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
@@ -122,7 +122,7 @@ func GetEventById(c *fiber.Ctx) error {
 	}
 	matchId := bson.D{{"$match", bson.D{{"_id", objId}}}}
 	lookupStage := bson.D{{"$lookup", bson.D{{"from", "Speakers"}, {"localField", "slug"}, {"foreignField", "slug"}, {"as", "speakers"}}}}
-	cur, err := eventsCollection.Aggregate(context.Background(), mongo.Pipeline{matchId, lookupStage})
+	cur, err := eventsCollection.Aggregate(context.Background(), mongo.Pipeline{matchId, lookupStage, bson.D{{"$project", bson.D{{"rsvpUsers", 0}}}}})
 	if cur.All(context.Background(), &event); err != nil {
 		log.Println("Error ", err)
 		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
@@ -160,7 +160,7 @@ func GetEventBySlug(c *fiber.Ctx) error {
 	}
 	matchSlug := bson.D{{"$match", bson.D{{"slug", slug}}}}
 	lookupStage := bson.D{{"$lookup", bson.D{{"from", "Speakers"}, {"localField", "slug"}, {"foreignField", "slug"}, {"as", "speakers"}}}}
-	cur, err := eventsCollection.Aggregate(context.Background(), mongo.Pipeline{matchSlug, lookupStage})
+	cur, err := eventsCollection.Aggregate(context.Background(), mongo.Pipeline{matchSlug, lookupStage, bson.D{{"$project", bson.D{{"rsvpUsers", 0}}}}})
 	if cur.All(context.Background(), &event); err != nil {
 		log.Println("Error ", err)
 		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
