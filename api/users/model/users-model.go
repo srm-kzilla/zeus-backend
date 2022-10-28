@@ -11,6 +11,7 @@ type User struct {
 	PhoneNumber int                `validate:"required,min=1000000000,max=9999999999" json:"phoneNumber" bson:"phoneNumber"`
 	RegNumber   string             `validate:"required" json:"regNumber" bson:"regNumber"`
 	EventSlugs  []string           `json:"events" bson:"events"`
+	CreatedAt	string			   `json:"createdAt" bson:"createdAt"`
 }
 
 type RsvpUsers struct {

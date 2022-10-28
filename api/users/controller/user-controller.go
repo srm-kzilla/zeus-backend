@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
@@ -118,6 +119,7 @@ func RegisterForEvent(c *fiber.Ctx) error {
 		return nil
 	}
 	user.ID = primitive.NewObjectID()
+	user.CreatedAt = time.Now().Unix()
 	user.EventSlugs = append(user.EventSlugs, reqBody.EventSlug)
 	res, err := usersCollection.InsertOne(context.Background(), user)
 	if err != nil {
