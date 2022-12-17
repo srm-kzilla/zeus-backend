@@ -22,9 +22,11 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-/*********************************************************************************
+/*
+********************************************************************************
 Get User data for registration and allocate the respective Event Slug to the user.
-*********************************************************************************/
+********************************************************************************
+*/
 func RegisterForEvent(c *fiber.Ctx) error {
 	var reqBody userModel.RegisterUserReq
 	c.BodyParser(&reqBody)
@@ -137,9 +139,11 @@ func RegisterForEvent(c *fiber.Ctx) error {
 	return nil
 }
 
-/******************************************************************
+/*
+*****************************************************************
 Checks in the RSVP parameter for the particular user for the event.
-******************************************************************/
+*****************************************************************
+*/
 func RsvpForEvent(c *fiber.Ctx) error {
 	var reqBody userModel.RsvpUserReq
 	c.QueryParser(&reqBody)
@@ -195,17 +199,22 @@ func RsvpForEvent(c *fiber.Ctx) error {
 	err := usersCollection.FindOne(context.Background(), bson.M{"_id": objId}).Decode(&user)
 	if err != nil {
 		log.Println("Error", err)
-		c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"Success": false,
-			"Error":   "User not found",
+		message := "User not Found."
+		lottieFile := constants.Animations.EventDoesNotExist
+		c.Status(fiber.StatusBadRequest)
+		return c.Render("rsvpConfirmationTemplate", fiber.Map{
+			"Message":    message,
+			"LottieFile": lottieFile,
 		})
-		return nil
 	}
 	if !helpers.ExistsInArray(user.EventSlugs, reqBody.EventSlug) {
-		c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "User not registered for this event",
+		message := "User not registered for this event."
+		lottieFile := constants.Animations.EventDoesNotExist
+		c.Status(fiber.StatusBadRequest)
+		return c.Render("rsvpConfirmationTemplate", fiber.Map{
+			"Message":    message,
+			"LottieFile": lottieFile,
 		})
-		return nil
 	}
 
 	if helpers.ExistsInArray(event.RSVPUsers, reqBody.UserId) {
@@ -255,9 +264,11 @@ func RsvpForEvent(c *fiber.Ctx) error {
 
 }
 
-/********************************************************************
+/*
+*******************************************************************
 Get a particular User's data from the Collection using user ObjectID.
-********************************************************************/
+*******************************************************************
+*/
 func GetUserById(c *fiber.Ctx) error {
 	userId := c.Params("userId")
 	if userId == "" {
