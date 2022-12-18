@@ -55,7 +55,7 @@ func main() {
 
 	//setting up a rate limiter for max 100 requests/min per user
 	app.Use(limiter.New(limiter.Config{
-		Max:        5,
+		Max:        100,
 		Expiration: 60 * time.Second,
 	}))
 	// setting up api routes
