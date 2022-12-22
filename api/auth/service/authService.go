@@ -14,7 +14,7 @@ Generates a JWT token for every admin issuer.
 func GenerateToken(email string) (string, error) {
 	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
 		Issuer:    email,
-		ExpiresAt: time.Now().Add(time.Hour * 8).Unix(),
+		ExpiresAt: time.Now().Add(time.Hour * 336).Unix(),
 	})
 
 	token, err := claims.SignedString([]byte(os.Getenv("SECRET")))
