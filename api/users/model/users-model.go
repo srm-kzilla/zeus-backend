@@ -21,7 +21,7 @@ type RsvpUsers struct {
 }
 
 type RegisterUserReq struct {
-	User      User   `validate:"required" "json:"user" bson:"user"`
+	User      User   `validate:"required" json:"user" bson:"user"`
 	EventSlug string `validate:"required" json:"eventSlug" bson:"eventSlug"`
 }
 

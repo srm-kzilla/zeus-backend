@@ -12,6 +12,7 @@ import (
 	eventModel "github.com/srm-kzilla/events/api/events/model"
 	userModel "github.com/srm-kzilla/events/api/users/model"
 	"github.com/srm-kzilla/events/database"
+	"github.com/srm-kzilla/events/utils/constants"
 	"github.com/srm-kzilla/events/utils/helpers"
 	"github.com/srm-kzilla/events/utils/services/mailer"
 	qr "github.com/srm-kzilla/events/utils/services/qrcode"
@@ -22,17 +23,11 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var animations = userModel.Animation{
-	RsvpSuccess:       "https://assets2.lottiefiles.com/packages/lf20_znxedwj6.json",
-	EventCompleted:    "https://assets8.lottiefiles.com/packages/lf20_rbbibjz5.json",
-	EventDoesNotExist: "https://assets8.lottiefiles.com/packages/lf20_rbbibjz5.json",
-	AlreadyRsvpd:      "https://assets2.lottiefiles.com/packages/lf20_znxedwj6.json",
-	FullyBooked:       "https://assets8.lottiefiles.com/packages/lf20_rbbibjz5.json",
-}
-
-/*********************************************************************************
+/*
+********************************************************************************
 Get User data for registration and allocate the respective Event Slug to the user.
-*********************************************************************************/
+********************************************************************************
+*/
 func RegisterForEvent(c *fiber.Ctx) error {
 	var reqBody userModel.RegisterUserReq
 	c.BodyParser(&reqBody)
@@ -146,9 +141,11 @@ func RegisterForEvent(c *fiber.Ctx) error {
 	return nil
 }
 
-/******************************************************************
+/*
+*****************************************************************
 Checks in the RSVP parameter for the particular user for the event.
-******************************************************************/
+*****************************************************************
+*/
 func RsvpForEvent(c *fiber.Ctx) error {
 	var reqBody userModel.RsvpUserReq
 	c.QueryParser(&reqBody)
@@ -182,7 +179,7 @@ func RsvpForEvent(c *fiber.Ctx) error {
 	if errr != nil {
 		c.Set(fiber.HeaderContentType, fiber.MIMETextHTML)
 		message := "Hmmm, It seems like you are trying to RSVP for an event that does not exist."
-		lottieFile := animations.EventDoesNotExist
+		lottieFile := constants.Animations.EventDoesNotExist
 		c.Status(fiber.StatusOK)
 		return c.Render("rsvpConfirmationTemplate", fiber.Map{
 			"Message":    message,
@@ -192,7 +189,7 @@ func RsvpForEvent(c *fiber.Ctx) error {
 	if event.IsCompleted {
 		c.Set(fiber.HeaderContentType, fiber.MIMETextHTML)
 		message := "Hey there! Sorry the event is already completed."
-		lottieFile := animations.EventCompleted
+		lottieFile := constants.Animations.EventCompleted
 		c.Status(fiber.StatusOK)
 		return c.Render("rsvpConfirmationTemplate", fiber.Map{
 			"Message":    message,
@@ -204,23 +201,28 @@ func RsvpForEvent(c *fiber.Ctx) error {
 	err := usersCollection.FindOne(context.Background(), bson.M{"_id": objId}).Decode(&user)
 	if err != nil {
 		log.Println("Error", err)
-		c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"Success": false,
-			"Error":   "User not found",
+		message := "User not Found."
+		lottieFile := constants.Animations.EventDoesNotExist
+		c.Status(fiber.StatusBadRequest)
+		return c.Render("rsvpConfirmationTemplate", fiber.Map{
+			"Message":    message,
+			"LottieFile": lottieFile,
 		})
-		return nil
 	}
 	if !helpers.ExistsInArray(user.EventSlugs, reqBody.EventSlug) {
-		c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "User not registered for this event",
+		message := "User not registered for this event."
+		lottieFile := constants.Animations.EventDoesNotExist
+		c.Status(fiber.StatusBadRequest)
+		return c.Render("rsvpConfirmationTemplate", fiber.Map{
+			"Message":    message,
+			"LottieFile": lottieFile,
 		})
-		return nil
 	}
 
 	if helpers.ExistsInArray(event.RSVPUsers, reqBody.UserId) {
 		c.Set(fiber.HeaderContentType, fiber.MIMETextHTML)
 		message := "Hey there! Don't be so anxious. Your seat has been reserved."
-		lottieFile := animations.AlreadyRsvpd
+		lottieFile := constants.Animations.AlreadyRsvpd
 		c.Status(fiber.StatusOK)
 		return c.Render("rsvpConfirmationTemplate", fiber.Map{
 			"Message":    message,
@@ -230,7 +232,7 @@ func RsvpForEvent(c *fiber.Ctx) error {
 	if len(event.RSVPUsers) >= event.MaxRsvp {
 		c.Set(fiber.HeaderContentType, fiber.MIMETextHTML)
 		message := "We're booked to capacity! We hope to see you in our next event."
-		lottieFile := animations.FullyBooked
+		lottieFile := constants.Animations.FullyBooked
 		c.Status(fiber.StatusOK)
 		return c.Render("rsvpConfirmationTemplate", fiber.Map{
 			"Message":    message,
@@ -253,8 +255,9 @@ func RsvpForEvent(c *fiber.Ctx) error {
 	mailer.SendEmail(sesInput)
 
 	c.Set(fiber.HeaderContentType, fiber.MIMETextHTML)
+
 	message := fmt.Sprintf("Your seat has been successfully reserved. You may now enter and explore the %s at %s on %s! ", event.Title, strings.Split(event.Timeline[0].Date, " ")[1], event.StartDate)
-	lottieFile := animations.RsvpSuccess
+	lottieFile := constants.Animations.RsvpSuccess
 	c.Status(fiber.StatusOK)
 	return c.Render("rsvpConfirmationTemplate", fiber.Map{
 		"Message":    message,
@@ -263,9 +266,11 @@ func RsvpForEvent(c *fiber.Ctx) error {
 
 }
 
-/********************************************************************
+/*
+*******************************************************************
 Get a particular User's data from the Collection using user ObjectID.
-********************************************************************/
+*******************************************************************
+*/
 func GetUserById(c *fiber.Ctx) error {
 	userId := c.Params("userId")
 	if userId == "" {
