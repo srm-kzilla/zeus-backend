@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"time"
 	"strings"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	eventModel "github.com/srm-kzilla/events/api/events/model"
@@ -110,20 +110,22 @@ func RegisterForEvent(c *fiber.Ctx) error {
 		}
 		check.EventSlugs = append(check.EventSlugs, reqBody.EventSlug)
 		usersCollection.FindOneAndReplace(context.Background(), bson.M{"email": user.Email}, check)
+		user = check
 		c.Status(fiber.StatusCreated).JSON(check)
-		return nil
-	}
-	user.ID = primitive.NewObjectID()
-	user.CreatedAt = fmt.Sprintf("%v",time.Now().Unix())
-	user.EventSlugs = append(user.EventSlugs, reqBody.EventSlug)
-	res, err := usersCollection.InsertOne(context.Background(), user)
-	if err != nil {
-		log.Println("Error", err)
-		c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"Success":     false,
-			"Inserted ID": res.InsertedID,
-		})
-		return err
+
+	} else {
+		user.ID = primitive.NewObjectID()
+		user.CreatedAt = fmt.Sprintf("%v", time.Now().Unix())
+		user.EventSlugs = append(user.EventSlugs, reqBody.EventSlug)
+		res, err := usersCollection.InsertOne(context.Background(), user)
+		if err != nil {
+			log.Println("Error", err)
+			c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"Success":     false,
+				"Inserted ID": res.InsertedID,
+			})
+			return err
+		}
 	}
 	newUserEmbed := mailer.NewUserEmbed{
 		Name: user.Name,
