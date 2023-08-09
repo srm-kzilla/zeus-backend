@@ -132,7 +132,7 @@ func RegisterForEvent(c *fiber.Ctx) error {
 	}
 	sesInput := mailer.SESInput{
 		TemplateName:  mailer.TEMPLATES.NewUserTemplate,
-		Subject:       "Registration Successfull",
+		Subject:       "Registration Successful",
 		Name:          user.Name,
 		RecieverEmail: user.Email,
 		SenderEmail:   os.Getenv("SENDER_EMAIL"),
@@ -248,7 +248,7 @@ func RsvpForEvent(c *fiber.Ctx) error {
 	eventsCollection.FindOneAndReplace(context.Background(), bson.M{"slug": reqBody.EventSlug}, event)
 	sesInput := mailer.SESInput{
 		TemplateName:  mailer.TEMPLATES.RsvpTemplate,
-		Subject:       "RSVP Successfull",
+		Subject:       "RSVP Successful",
 		Name:          user.Name,
 		RecieverEmail: user.Email,
 		SenderEmail:   os.Getenv("SENDER_EMAIL"),
