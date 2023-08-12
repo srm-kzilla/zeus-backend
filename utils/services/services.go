@@ -17,3 +17,8 @@ func GenerateCollegeYearRegistrationPrefix() (firstYearPrefix, secondYearPrefix,
 	fourthYearPrefix = "RA" + strconv.Itoa(currentFirstYear-3)
 	return firstYearPrefix, secondYearPrefix, thirdYearPrefix, fourthYearPrefix, nil
 }
+
+func VerifyRouteSecret(secret string) bool {
+	routeSecret := os.Getenv("ROUTE_SECRET")
+	return secret == routeSecret
+}
