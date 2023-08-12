@@ -543,10 +543,10 @@ func GetEventRegistrationsCount(c *fiber.Ctx) error {
 		})
 	}
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"totalUsers":  totalRegistrations,
-		"fourthYears": fourthYears,
-		"thirdYears":  thirdYears,
-		"secondYears": secondYears,
-		"firstYears":  firstYears,
+		"totalRegistrations": totalRegistrations,
+		"fourthYears":        fourthYears,
+		"thirdYears":         thirdYears,
+		"secondYears":        secondYears,
+		"firstYears":         firstYears,
 	})
 }
