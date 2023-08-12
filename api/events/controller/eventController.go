@@ -14,6 +14,7 @@ import (
 	userModel "github.com/srm-kzilla/events/api/users/model"
 	"github.com/srm-kzilla/events/database"
 	helpers "github.com/srm-kzilla/events/utils/helpers"
+	"github.com/srm-kzilla/events/utils/services"
 	S3 "github.com/srm-kzilla/events/utils/services/s3"
 	"github.com/srm-kzilla/events/validators"
 	"go.mongodb.org/mongo-driver/bson"
@@ -512,6 +513,14 @@ Get event totaal registrations count by event slug.
 */
 func GetEventRegistrationsCount(c *fiber.Ctx) error {
 	slug := c.Params("slug")
+
+	secret := c.Params("secret")
+	if !services.VerifyRouteSecret(secret) {
+		return c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
+			"error": "Invalid route secret",
+		})
+	}
+
 	usersCollection, e := database.GetCollection(os.Getenv("DB_NAME"), "Users")
 	if e != nil {
 		fmt.Println("Error: ", e)
