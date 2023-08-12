@@ -10,6 +10,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	eventModel "github.com/srm-kzilla/events/api/events/model"
+	eventService "github.com/srm-kzilla/events/api/events/service"
 	userModel "github.com/srm-kzilla/events/api/users/model"
 	"github.com/srm-kzilla/events/database"
 	helpers "github.com/srm-kzilla/events/utils/helpers"
@@ -21,9 +22,11 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-/***********************************************
+/*
+**********************************************
 Get all Events present in the Events Collection.
-***********************************************/
+**********************************************
+*/
 func GetAllEvents(c *fiber.Ctx) error {
 	var events []bson.M
 	eventsCollection, e := database.GetCollection(os.Getenv("DB_NAME"), "Events")
@@ -34,7 +37,7 @@ func GetAllEvents(c *fiber.Ctx) error {
 		})
 	}
 	lookupStage := bson.D{{"$lookup", bson.D{{"from", "Speakers"}, {"localField", "slug"}, {"foreignField", "slug"}, {"as", "speakers"}}}}
-	cursor, err := eventsCollection.Aggregate(context.Background(), mongo.Pipeline{lookupStage, bson.D{{"$sort", bson.D{{"_id", -1}}}}, bson.D{{"$project",bson.D{{"rsvpUsers",0}}}}})
+	cursor, err := eventsCollection.Aggregate(context.Background(), mongo.Pipeline{lookupStage, bson.D{{"$sort", bson.D{{"_id", -1}}}}, bson.D{{"$project", bson.D{{"rsvpUsers", 0}}}}})
 	if err = cursor.All(context.Background(), &events); err != nil {
 		log.Println("Error ", err)
 		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
@@ -47,9 +50,13 @@ func GetAllEvents(c *fiber.Ctx) error {
 	return nil
 }
 
-/***********************
-   Create a new Event.
-***********************/
+/*
+**********************
+
+	Create a new Event.
+
+**********************
+*/
 func CreateEvent(c *fiber.Ctx) error {
 	var event eventModel.Event
 
@@ -99,9 +106,11 @@ func CreateEvent(c *fiber.Ctx) error {
 	return nil
 }
 
-/****************************************************************
+/*
+***************************************************************
 Get a particular Event's data from the Collection using ObjectID.
-****************************************************************/
+***************************************************************
+*/
 func GetEventById(c *fiber.Ctx) error {
 	var event []bson.M
 	var id = c.Query("id")
@@ -136,9 +145,11 @@ func GetEventById(c *fiber.Ctx) error {
 
 }
 
-/******************************************
+/*
+*****************************************
 Get Event from collection using Event Slug.
-******************************************/
+*****************************************
+*/
 func GetEventBySlug(c *fiber.Ctx) error {
 	// var event eventModel.Event
 	var event []bson.M
@@ -173,9 +184,11 @@ func GetEventBySlug(c *fiber.Ctx) error {
 
 }
 
-/**************************************************
+/*
+*************************************************
 Get all Users of a specific Event using Event Slug.
-**************************************************/
+*************************************************
+*/
 func GetEventUsers(c *fiber.Ctx) error {
 	var users []userModel.User
 	var slug = strings.ToLower(c.Query("slug"))
@@ -204,9 +217,11 @@ func GetEventUsers(c *fiber.Ctx) error {
 	return nil
 }
 
-/****************************
+/*
+***************************
 Close Event using Event Slug.
-****************************/
+***************************
+*/
 func CloseEvent(c *fiber.Ctx) error {
 	var event eventModel.Event
 	var slug = strings.ToLower(c.Query("slug"))
@@ -237,9 +252,11 @@ func CloseEvent(c *fiber.Ctx) error {
 	return nil
 }
 
-/******************************************
+/*
+*****************************************
 Close Event Registrations using Event slug.
-******************************************/
+*****************************************
+*/
 func CloseRegistrations(c *fiber.Ctx) error {
 	var event eventModel.Event
 	var slug = strings.ToLower(c.Query("slug"))
@@ -269,9 +286,11 @@ func CloseRegistrations(c *fiber.Ctx) error {
 	return nil
 }
 
-/****************************************
+/*
+***************************************
 Upload Event Cover File using Event Slug.
-****************************************/
+***************************************
+*/
 func UploadEventCover(c *fiber.Ctx) error {
 	var slug = c.Query("slug")
 	if slug == "" {
@@ -307,9 +326,11 @@ func UploadEventCover(c *fiber.Ctx) error {
 	return nil
 }
 
-/****************************************
+/*
+***************************************
 Add Speakers to a Event using Event Slug.
-****************************************/
+***************************************
+*/
 func AddSpeaker(c *fiber.Ctx) error {
 	var speaker eventModel.Speaker
 	var check eventModel.Speaker
@@ -371,9 +392,11 @@ func AddSpeaker(c *fiber.Ctx) error {
 	return nil
 }
 
-/*************************************
+/*
+************************************
 Update Event Details using Event Slug.
-*************************************/
+************************************
+*/
 func UpdateEvent(c *fiber.Ctx) error {
 	var event eventModel.Event
 	var check eventModel.Event
@@ -418,9 +441,11 @@ func UpdateEvent(c *fiber.Ctx) error {
 	return nil
 }
 
-/***************************************
+/*
+**************************************
 Update Speaker Details using Event Slug.
-***************************************/
+**************************************
+*/
 func UpdateSpeaker(c *fiber.Ctx) error {
 	var speaker eventModel.Speaker
 	var check eventModel.Speaker
@@ -478,4 +503,50 @@ func UpdateSpeaker(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(speaker)
 
+}
+
+/*
+*************************************************
+Get event totaal registrations count by event slug.
+*************************************************
+*/
+func GetEventRegistrationsCount(c *fiber.Ctx) error {
+	slug := c.Params("slug")
+	usersCollection, e := database.GetCollection(os.Getenv("DB_NAME"), "Users")
+	if e != nil {
+		fmt.Println("Error: ", e)
+		c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error":   e.Error(),
+			"message": "Collection Not found",
+		})
+	}
+	var users []userModel.User
+	cursor, err := usersCollection.Find(context.Background(), bson.M{"events": slug})
+	if err != nil {
+		log.Println("Error", err)
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error":   err.Error(),
+			"message": "Error finding users",
+		})
+	}
+	if e = cursor.All(context.Background(), &users); e != nil {
+		fmt.Println("Error ", err)
+		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+	totalRegistrations, firstYears, secondYears, thirdYears, fourthYears, err := eventService.GetUsersByCollegeYear(users)
+	if err != nil {
+		fmt.Println("Error ", err)
+		c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"totalRegistrations": totalRegistrations,
+		"fourthYears":        fourthYears,
+		"thirdYears":         thirdYears,
+		"secondYears":        secondYears,
+		"firstYears":         firstYears,
+	})
 }
