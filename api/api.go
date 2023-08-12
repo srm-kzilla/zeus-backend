@@ -23,7 +23,7 @@ func SetupApp(app *fiber.App) {
 	api.Get("/events", eventController.GetAllEvents)
 	api.Post("/register", userController.RegisterForEvent)
 	api.Get("/rsvp", userController.RsvpForEvent)
-	api.Get("/event/:slug/registrations/:secret", eventController.GetEventRegistrationsCount)
+	api.Get("/event/:slug/registrations", eventController.GetEventRegistrationsCount)
 	protected := api.Use(authController.AuthenticateAdmin)
 	protected.Get("/users", eventController.GetEventUsers)
 	protected.Get("/user/:userId", userController.GetUserById)

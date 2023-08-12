@@ -514,7 +514,7 @@ Get event totaal registrations count by event slug.
 func GetEventRegistrationsCount(c *fiber.Ctx) error {
 	slug := c.Params("slug")
 
-	secret := c.Params("secret")
+	secret := c.Query("secret")
 	if !services.VerifyRouteSecret(secret) {
 		return c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
 			"error": "Invalid route secret",
