@@ -10,6 +10,9 @@ import (
 func GetUsersByCollegeYear(users []userModel.User) (totalRegistrations, firstYears, secondYears, thirdYears, fourthYears int, err error) {
 	totalRegistrations = len(users)
 	firstYearPrefix, secondYearPrefix, thirdYearPrefix, fourthYearPrefix, err := services.GenerateCollegeYearRegistrationPrefix()
+	if err != nil {
+		return totalRegistrations, 0, 0, 0, 0, err
+	}
 	for _, user := range users {
 		regNumber := strings.ToUpper(user.RegNumber)
 		switch {
